@@ -14,12 +14,13 @@ model User {
   id       String     @id @default(uuid())
   username String     @unique
   comments Comments[]
+  Likes    Likes[]
 }
 
 model Post {
   id         String     @id @default(uuid())
-  title      String
-  decription String
+  title      String     @db.Text
+  decription String     @db.Text
   comments   Comments[]
 }
 
@@ -27,12 +28,23 @@ model Comments {
   id        String     @id @default(uuid())
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
-  message   String
-  post      Post       @relation(fields: [postId], references: [id])
+  message   String     @db.Text
+  post      Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId    String
-  user      User       @relation(fields: [userId], references: [id])
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   parent    Comments?  @relation("ParentChild", fields: [parentId], references: [id])
   children  Comments[] @relation("ParentChild")
   parentId  String?
+  Likes     Likes[]
+}
+
+model Likes {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  comment   Comments @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  commentId String
+
+  @@unique([userId, commentId])
 }
