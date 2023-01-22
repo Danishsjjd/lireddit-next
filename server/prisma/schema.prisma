@@ -11,39 +11,39 @@ datasource db {
 }
 
 model User {
-  id       String     @id @default(uuid())
-  username String     @unique
-  comments Comments[]
-  Likes    Likes[]
+  id       String    @id @default(uuid())
+  username String    @unique
+  comments Comment[]
+  likes    Likes[]
 }
 
 model Post {
-  id         String     @id @default(uuid())
-  title      String     @db.Text
-  decription String     @db.Text
-  comments   Comments[]
+  id       String    @id @default(uuid())
+  title    String    @db.Text
+  body     String    @db.Text
+  comments Comment[]
 }
 
-model Comments {
-  id        String     @id @default(uuid())
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  message   String     @db.Text
-  post      Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
+model Comment {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  message   String    @db.Text
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId    String
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
-  parent    Comments?  @relation("ParentChild", fields: [parentId], references: [id])
-  children  Comments[] @relation("ParentChild")
+  parent    Comment?  @relation("ParentChild", fields: [parentId], references: [id])
+  children  Comment[] @relation("ParentChild")
   parentId  String?
-  Likes     Likes[]
+  likes     Likes[]
 }
 
 model Likes {
-  id        String   @id @default(uuid())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String  @id @default(uuid())
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
-  comment   Comments @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
   commentId String
 
   @@unique([userId, commentId])
