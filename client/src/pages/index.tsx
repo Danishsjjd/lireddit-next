@@ -11,7 +11,7 @@ export default function Home() {
     <section className="flex flex-col gap-3 m-8 font-medium text-xl underline text-blue-800">
       {data?.posts?.map((post) => {
         return (
-          <Link href={`/${post.id}`} key={post.id} className="">
+          <Link href={`/posts/${post.id}`} key={post.id} className="">
             {post.title}
           </Link>
         )

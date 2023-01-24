@@ -1,7 +1,5 @@
 query posts {
   posts {
-    title
-    body
-    id
+    ...postData
   }
 }

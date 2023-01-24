@@ -8,7 +8,7 @@ const queryClient = new QueryClient()
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools />
+      {process.env.NODE_ENV !== "production" && <ReactQueryDevtools />}
       <Component {...pageProps} />
     </QueryClientProvider>
   )

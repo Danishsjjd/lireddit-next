@@ -1,0 +1,5 @@
+query post($id: String!) {
+  post(id: $id) {
+    ...postData
+  }
+}
