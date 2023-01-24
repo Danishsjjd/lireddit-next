@@ -5,6 +5,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator PrismaTypeGraphQLTypesGenerator {
+  provider = "prisma-typegraphql-types-generator"
+}
+
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")

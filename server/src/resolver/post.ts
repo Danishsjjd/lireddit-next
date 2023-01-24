@@ -1,6 +1,8 @@
-import { Ctx, Query, Resolver, Arg } from "type-graphql"
-import Post from "../schema/Post"
+import { Ctx, Query, Resolver, Arg, Info } from "type-graphql"
+import { Post, PostWithComments } from "../generated/models/Post"
 import { MyContext } from "../type"
+import { PrismaSelect } from "@paljs/plugins"
+//
 
 @Resolver()
 class PostResolver {
@@ -9,36 +11,39 @@ class PostResolver {
     return prisma.post.findMany()
   }
 
-  @Query(() => Post)
-  async post(@Arg("id") id: string, @Ctx() { prisma }: MyContext) {
+  @Query(() => PostWithComments)
+  async post(
+    @Arg("id") id: string,
+    @Ctx() { prisma }: MyContext,
+    @Info() info: any
+  ) {
+    const postSelect = new PrismaSelect(info).value.select
+
+    let commentsSelect: any = null
+    if (postSelect.comments) {
+      commentsSelect = postSelect.comments
+      delete postSelect.comments
+    }
+
     const res = await prisma.post.findFirst({
       where: {
         id,
       },
       select: {
-        body: true,
-        title: true,
-        id: true,
-        comments: {
-          orderBy: {
-            createdAt: "desc",
-          },
-          select: {
-            id: true,
-            message: true,
-            parentId: true,
-            createdAt: true,
-            user: {
+        ...postSelect,
+        comments: !commentsSelect
+          ? false
+          : {
+              orderBy: {
+                createdAt: "desc",
+              },
               select: {
-                id: true,
-                username: true,
+                ...commentsSelect.select,
               },
             },
-          },
-        },
       },
     })
-    console.log(res)
+    if (res === null) throw new Error("post id is not correct")
     return res
   }
 }
