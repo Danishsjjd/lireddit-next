@@ -21,35 +21,120 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  DateTime: any;
+};
+
+export type Comment = {
+  __typename?: 'Comment';
+  children: Array<Comment>;
+  createdAt: Scalars['DateTime'];
+  id: Scalars['ID'];
+  likes: Array<Likes>;
+  message: Scalars['String'];
+  parent?: Maybe<Comment>;
+  parentId?: Maybe<Scalars['String']>;
+  post: Post;
+  postId: Scalars['String'];
+  updatedAt: Scalars['DateTime'];
+  user: User;
+  userId: Scalars['String'];
+};
+
+export type Likes = {
+  __typename?: 'Likes';
+  comment: Comment;
+  commentId: Scalars['String'];
+  id: Scalars['ID'];
+  user: User;
+  userId: Scalars['String'];
 };
 
 export type Post = {
   __typename?: 'Post';
   body: Scalars['String'];
-  id: Scalars['String'];
+  comments: Array<Comment>;
+  id: Scalars['ID'];
   title: Scalars['String'];
 };
 
 export type Query = {
   __typename?: 'Query';
+  post: Post;
   posts: Array<Post>;
 };
+
+
+export type QueryPostArgs = {
+  id: Scalars['String'];
+};
+
+export type User = {
+  __typename?: 'User';
+  comments: Array<Comment>;
+  id: Scalars['ID'];
+  likes: Array<Likes>;
+  username: Scalars['String'];
+};
+
+export type PostDataFragment = { __typename?: 'Post', title: string, id: string, body: string };
+
+export type PostQueryVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type PostQuery = { __typename?: 'Query', post: { __typename?: 'Post', title: string, id: string, body: string, comments: Array<{ __typename?: 'Comment', id: string, createdAt: any, message: string, parentId?: string | null, user: { __typename?: 'User', id: string, username: string } }> } };
 
 export type PostsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', title: string, body: string, id: string }> };
+export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', title: string, id: string, body: string }> };
 
-
+export const PostDataFragmentDoc = `
+    fragment postData on Post {
+  title
+  id
+  body
+}
+    `;
+export const PostDocument = `
+    query post($id: String!) {
+  post(id: $id) {
+    comments {
+      id
+      createdAt
+      message
+      parentId
+      user {
+        id
+        username
+      }
+    }
+    ...postData
+  }
+}
+    ${PostDataFragmentDoc}`;
+export const usePostQuery = <
+      TData = PostQuery,
+      TError = unknown
+    >(
+      client: GraphQLClient,
+      variables: PostQueryVariables,
+      options?: UseQueryOptions<PostQuery, TError, TData>,
+      headers?: RequestInit['headers']
+    ) =>
+    useQuery<PostQuery, TError, TData>(
+      ['post', variables],
+      fetcher<PostQuery, PostQueryVariables>(client, PostDocument, variables, headers),
+      options
+    );
 export const PostsDocument = `
     query posts {
   posts {
-    title
-    body
-    id
+    ...postData
   }
 }
-    `;
+    ${PostDataFragmentDoc}`;
 export const usePostsQuery = <
       TData = PostsQuery,
       TError = unknown

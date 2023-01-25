@@ -1,5 +1,15 @@
 query post($id: String!) {
   post(id: $id) {
+    comments {
+      id
+      createdAt
+      message
+      parentId
+      user {
+        id
+        username
+      }
+    }
     ...postData
   }
 }

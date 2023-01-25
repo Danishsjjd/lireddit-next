@@ -12,11 +12,7 @@ export class Post {
   @Field()
   body: string
 
-  // skip overwrite 👇
-}
-
-@ObjectType()
-export class PostWithComments extends Post {
   @Field((_type) => [Comment])
   comments: Comment[]
+  // skip overwrite 👇
 }
