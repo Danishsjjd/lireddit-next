@@ -8,7 +8,7 @@ export default function Home() {
   if (isLoading) return <span>loading...</span>
 
   return (
-    <section className="flex flex-col gap-3 m-8 font-medium text-xl underline text-blue-800">
+    <section className="m-8 flex flex-col gap-3 text-xl font-medium text-blue-800 underline">
       {data?.posts?.map((post) => {
         return (
           <Link href={`/posts/${post.id}`} key={post.id} className="">

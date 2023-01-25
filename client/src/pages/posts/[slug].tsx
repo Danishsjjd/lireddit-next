@@ -1,11 +1,10 @@
 import CommentList from "@/components/CommentList"
 import { PostProvider } from "@/context/PostContext"
-import { usePostQuery, PostDocument, PostQuery } from "@/generated/graphql"
-import usePost from "@/hooks/usePost"
+import { PostDocument } from "@/generated/graphql"
+import { usePost } from "@/context/PostContext"
 import graphqlRequest from "@/libs/graphqlRequest"
 import { dehydrate, QueryClient } from "@tanstack/react-query"
 import { GetServerSideProps } from "next"
-import { useRouter } from "next/router"
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const { slug } = ctx.query
@@ -27,13 +26,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 }
 
 const Post = () => {
-  const { query } = useRouter()
-  const { slug } = query
-  const { data: post } = usePostQuery(graphqlRequest, {
-    id: slug as string,
-  })
+  const { post, rootComments } = usePost()
 
-  const { rootComments } = usePost(post as PostQuery)
   return (
     <PostProvider>
       <div className="mx-auto max-w-7xl space-y-5 p-5">
@@ -50,4 +44,12 @@ const Post = () => {
   )
 }
 
-export default Post
+const Provider = () => {
+  return (
+    <PostProvider>
+      <Post />
+    </PostProvider>
+  )
+}
+
+export default Provider
