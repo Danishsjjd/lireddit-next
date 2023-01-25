@@ -1,6 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
 import { RequestInit } from 'graphql-request/dist/types.dom';
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { useMutation, useQuery, UseMutationOptions, UseQueryOptions } from '@tanstack/react-query';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -40,6 +40,12 @@ export type Comment = {
   userId: Scalars['String'];
 };
 
+export type CommentsInputs = {
+  message: Scalars['String'];
+  parentId?: InputMaybe<Scalars['String']>;
+  postId: Scalars['String'];
+};
+
 export type Likes = {
   __typename?: 'Likes';
   comment: Comment;
@@ -47,6 +53,16 @@ export type Likes = {
   id: Scalars['ID'];
   user: User;
   userId: Scalars['String'];
+};
+
+export type Mutation = {
+  __typename?: 'Mutation';
+  createComment: Comment;
+};
+
+
+export type MutationCreateCommentArgs = {
+  options: CommentsInputs;
 };
 
 export type Post = {
@@ -78,6 +94,13 @@ export type User = {
 
 export type PostDataFragment = { __typename?: 'Post', title: string, id: string, body: string };
 
+export type CreateCommentMutationVariables = Exact<{
+  options: CommentsInputs;
+}>;
+
+
+export type CreateCommentMutation = { __typename?: 'Mutation', createComment: { __typename?: 'Comment', id: string, createdAt: any, updatedAt: any, message: string, user: { __typename?: 'User', id: string, username: string } } };
+
 export type PostQueryVariables = Exact<{
   id: Scalars['String'];
 }>;
@@ -97,6 +120,33 @@ export const PostDataFragmentDoc = `
   body
 }
     `;
+export const CreateCommentDocument = `
+    mutation createComment($options: CommentsInputs!) {
+  createComment(options: $options) {
+    id
+    createdAt
+    updatedAt
+    message
+    user {
+      id
+      username
+    }
+  }
+}
+    `;
+export const useCreateCommentMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(
+      client: GraphQLClient,
+      options?: UseMutationOptions<CreateCommentMutation, TError, CreateCommentMutationVariables, TContext>,
+      headers?: RequestInit['headers']
+    ) =>
+    useMutation<CreateCommentMutation, TError, CreateCommentMutationVariables, TContext>(
+      ['createComment'],
+      (variables?: CreateCommentMutationVariables) => fetcher<CreateCommentMutation, CreateCommentMutationVariables>(client, CreateCommentDocument, variables, headers)(),
+      options
+    );
 export const PostDocument = `
     query post($id: String!) {
   post(id: $id) {

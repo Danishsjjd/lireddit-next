@@ -1,21 +1,8 @@
 import { Ctx, Query, Resolver, Arg, Info } from "type-graphql"
 import { Post } from "../generated/models/Post"
 import { MyContext } from "../type"
-import { PrismaSelect } from "@paljs/plugins"
 import { GraphQLResolveInfo } from "graphql"
-
-function extractKey(info: GraphQLResolveInfo, nested?: string) {
-  const postSelect = new PrismaSelect(info).value.select
-
-  let nestedKey: any = null
-  if (nested)
-    if (postSelect[nested]) {
-      nestedKey = postSelect[nested]
-      delete postSelect[nested]
-    }
-
-  return [postSelect, nestedKey]
-}
+import { extractKey } from "./extractKey"
 
 @Resolver()
 class PostResolver {

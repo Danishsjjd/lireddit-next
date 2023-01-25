@@ -1,0 +1,12 @@
+mutation createComment($options: CommentsInputs!) {
+  createComment(options: $options) {
+    id
+    createdAt
+    updatedAt
+    message
+    user {
+      id
+      username
+    }
+  }
+}
