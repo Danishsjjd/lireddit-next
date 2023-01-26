@@ -128,9 +128,9 @@ const Comment = ({ comment }: Props) => {
     )
   }
 
-  const isCurrentLikeIt =
-    comment.likes.filter(({ userId }) => userId == (currentUser?.id as string))
-      .length > 0
+  const isCurrentLikeIt = comment.likes.some(
+    ({ userId }) => userId == (currentUser?.id as string)
+  )
 
   return (
     <>
