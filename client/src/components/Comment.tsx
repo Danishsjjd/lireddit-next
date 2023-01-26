@@ -1,8 +1,11 @@
 import { FaHeart, FaReply, FaEdit, FaTrash } from "react-icons/fa"
 import { Comment as CommentType, usePost } from "@/context/PostContext"
 import { IconBtn } from "./IconBtn"
-import { useEffect, useState } from "react"
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import CommentList from "./CommentList"
+import CommentForm from "./CommentForm"
+import { useCreateCommentMutation } from "@/generated/graphql"
+import graphqlRequest from "@/libs/graphqlRequest"
 
 type Props = {
   comment: CommentType[number]
@@ -10,8 +13,10 @@ type Props = {
 
 const Comment = ({ comment }: Props) => {
   const { createdAt, id, message, user } = comment
-  const { commentsByParentId } = usePost()
+  const { commentsByParentId, post, onPostCommentUpdates } = usePost()
   const [ariaHidden, setAriaHidden] = useState(false)
+  const [isReplying, setIsReplying] = useState(false)
+  const { mutate, isLoading } = useCreateCommentMutation(graphqlRequest)
 
   const childComments = commentsByParentId?.[id]
 
@@ -31,6 +36,28 @@ const Comment = ({ comment }: Props) => {
     setClientCreatedAt(dateFormatter.format(Date.parse(createdAt)))
   }, [])
 
+  function onNestedCommentCreation(
+    msg: string,
+    setMsg: Dispatch<SetStateAction<string>>
+  ) {
+    mutate(
+      {
+        options: {
+          message: msg,
+          postId: post?.post.id as string,
+          parentId: id,
+        },
+      },
+      {
+        onSuccess({ createComment }) {
+          onPostCommentUpdates?.(createComment)
+          setMsg("")
+          setIsReplying(false)
+        },
+      }
+    )
+  }
+
   return (
     <>
       <div className="rounded-lg border p-2">
@@ -40,19 +67,27 @@ const Comment = ({ comment }: Props) => {
         </header>
         <div className="mx-2 whitespace-pre-wrap">{message}</div>
         <footer className="mt-2 flex gap-1">
-          <IconBtn isActive={false} Icon={FaHeart} aria-label="Like">
+          <IconBtn isActive={false} Icon={FaHeart}>
             2
           </IconBtn>
-          <IconBtn isActive={false} Icon={FaReply} aria-label="Reply" />
-          <IconBtn isActive={false} Icon={FaEdit} aria-label="Edit" />
           <IconBtn
-            isActive={false}
-            Icon={FaTrash}
-            aria-label="Trash"
-            color="danger"
+            onClick={() => setIsReplying((pre) => !pre)}
+            isActive={isReplying}
+            Icon={FaReply}
           />
+          <IconBtn isActive={false} Icon={FaEdit} />
+          <IconBtn isActive={false} Icon={FaTrash} color="danger" />
         </footer>
       </div>
+      {isReplying && (
+        <CommentForm
+          error=""
+          loading={isLoading}
+          onSubmit={onNestedCommentCreation}
+          autoFocus
+          initialValue=""
+        />
+      )}
       {childComments && childComments?.length > 0 && (
         <>
           <div className={`${ariaHidden ? "hidden" : "flex"}`}>

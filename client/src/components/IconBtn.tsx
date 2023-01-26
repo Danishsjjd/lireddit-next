@@ -21,8 +21,12 @@ export const IconBtn: React.FC<
 > = ({ Icon, children, color, isActive, ...otherProps }) => {
   return (
     <button
-      className={`relative flex items-center py-4 px-2 ${
-        color ? colors[color] : isActive ? "text-red-500" : "text-indigo-500"
+      className={` relative flex items-center p-1 ${
+        color
+          ? colors[color]
+          : isActive
+          ? "btn-before-style text-red-500"
+          : "text-indigo-500"
       } flex cursor-pointer rounded`}
       {...otherProps}
     >

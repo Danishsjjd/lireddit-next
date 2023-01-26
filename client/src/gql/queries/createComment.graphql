@@ -4,6 +4,7 @@ mutation createComment($options: CommentsInputs!) {
     createdAt
     updatedAt
     message
+    parentId
     user {
       id
       username

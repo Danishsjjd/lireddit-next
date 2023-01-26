@@ -30,6 +30,15 @@ class CommentsResolver {
 
     return results
   }
+
+  @Mutation(() => Comment)
+  async updateComment() {}
+
+  @Mutation(() => Boolean)
+  async deleteComment() {}
+
+  @Mutation(() => Boolean)
+  async LikePost() {}
 }
 
 export default CommentsResolver

@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.btn-before-style::before {
+  content: "\00D7";
+  position: absolute;
+  display: flex;
+  justify-items: center;
+  align-items: center;
+  font-size: 0.75em;
+  width: 1em;
+  height: 1em;
+  color: white;
+  background-color: red;
+  border-radius: 50%;
+  bottom: 0.1em;
+  right: 0.1em;
+}

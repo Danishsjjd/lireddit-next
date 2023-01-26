@@ -47,13 +47,14 @@ export function PostProvider({ children }: Props) {
     id,
     message,
     user,
+    parentId,
   }: Comment[number]) => {
     queryClient.setQueryData<PostQuery>(
       ["post", { id: post?.post.id }],
       (data) => {
         if (data?.post.comments) {
           const newComments = [
-            { createdAt, id, message, user, parentId: null },
+            { createdAt, id, message, user, parentId: parentId || null },
             ...data?.post.comments,
           ]
           return {

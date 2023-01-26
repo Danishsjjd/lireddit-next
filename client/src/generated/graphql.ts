@@ -99,7 +99,7 @@ export type CreateCommentMutationVariables = Exact<{
 }>;
 
 
-export type CreateCommentMutation = { __typename?: 'Mutation', createComment: { __typename?: 'Comment', id: string, createdAt: any, updatedAt: any, message: string, user: { __typename?: 'User', id: string, username: string } } };
+export type CreateCommentMutation = { __typename?: 'Mutation', createComment: { __typename?: 'Comment', id: string, createdAt: any, updatedAt: any, message: string, parentId?: string | null, user: { __typename?: 'User', id: string, username: string } } };
 
 export type PostQueryVariables = Exact<{
   id: Scalars['String'];
@@ -127,6 +127,7 @@ export const CreateCommentDocument = `
     createdAt
     updatedAt
     message
+    parentId
     user {
       id
       username
