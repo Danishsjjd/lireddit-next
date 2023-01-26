@@ -40,10 +40,16 @@ export type Comment = {
   userId: Scalars['String'];
 };
 
+export type CommentModify = {
+  commentId: Scalars['String'];
+  msg: Scalars['String'];
+};
+
 export type CommentsInputs = {
   message: Scalars['String'];
   parentId?: InputMaybe<Scalars['String']>;
   postId: Scalars['String'];
+  userId: Scalars['String'];
 };
 
 export type Likes = {
@@ -58,11 +64,29 @@ export type Likes = {
 export type Mutation = {
   __typename?: 'Mutation';
   createComment: Comment;
+  deleteComment: Scalars['Boolean'];
+  likeComment: Scalars['Boolean'];
+  updateComment: Scalars['Boolean'];
 };
 
 
 export type MutationCreateCommentArgs = {
   options: CommentsInputs;
+};
+
+
+export type MutationDeleteCommentArgs = {
+  commentId: Scalars['String'];
+};
+
+
+export type MutationLikeCommentArgs = {
+  commentId: Scalars['String'];
+};
+
+
+export type MutationUpdateCommentArgs = {
+  options: CommentModify;
 };
 
 export type Post = {
@@ -75,6 +99,7 @@ export type Post = {
 
 export type Query = {
   __typename?: 'Query';
+  me: User;
   post: Post;
   posts: Array<Post>;
 };
@@ -94,6 +119,20 @@ export type User = {
 
 export type PostDataFragment = { __typename?: 'Post', title: string, id: string, body: string };
 
+export type DeleteCommentMutationVariables = Exact<{
+  commentId: Scalars['String'];
+}>;
+
+
+export type DeleteCommentMutation = { __typename?: 'Mutation', deleteComment: boolean };
+
+export type UpdateCommentMutationVariables = Exact<{
+  options: CommentModify;
+}>;
+
+
+export type UpdateCommentMutation = { __typename?: 'Mutation', updateComment: boolean };
+
 export type CreateCommentMutationVariables = Exact<{
   options: CommentsInputs;
 }>;
@@ -101,12 +140,17 @@ export type CreateCommentMutationVariables = Exact<{
 
 export type CreateCommentMutation = { __typename?: 'Mutation', createComment: { __typename?: 'Comment', id: string, createdAt: any, updatedAt: any, message: string, parentId?: string | null, user: { __typename?: 'User', id: string, username: string } } };
 
+export type MeQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MeQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, username: string } };
+
 export type PostQueryVariables = Exact<{
   id: Scalars['String'];
 }>;
 
 
-export type PostQuery = { __typename?: 'Query', post: { __typename?: 'Post', title: string, id: string, body: string, comments: Array<{ __typename?: 'Comment', id: string, createdAt: any, message: string, parentId?: string | null, user: { __typename?: 'User', id: string, username: string } }> } };
+export type PostQuery = { __typename?: 'Query', post: { __typename?: 'Post', title: string, id: string, body: string, comments: Array<{ __typename?: 'Comment', id: string, createdAt: any, message: string, parentId?: string | null, likes: Array<{ __typename?: 'Likes', userId: string }>, user: { __typename?: 'User', id: string, username: string } }> } };
 
 export type PostsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -120,6 +164,42 @@ export const PostDataFragmentDoc = `
   body
 }
     `;
+export const DeleteCommentDocument = `
+    mutation deleteComment($commentId: String!) {
+  deleteComment(commentId: $commentId)
+}
+    `;
+export const useDeleteCommentMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(
+      client: GraphQLClient,
+      options?: UseMutationOptions<DeleteCommentMutation, TError, DeleteCommentMutationVariables, TContext>,
+      headers?: RequestInit['headers']
+    ) =>
+    useMutation<DeleteCommentMutation, TError, DeleteCommentMutationVariables, TContext>(
+      ['deleteComment'],
+      (variables?: DeleteCommentMutationVariables) => fetcher<DeleteCommentMutation, DeleteCommentMutationVariables>(client, DeleteCommentDocument, variables, headers)(),
+      options
+    );
+export const UpdateCommentDocument = `
+    mutation updateComment($options: CommentModify!) {
+  updateComment(options: $options)
+}
+    `;
+export const useUpdateCommentMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(
+      client: GraphQLClient,
+      options?: UseMutationOptions<UpdateCommentMutation, TError, UpdateCommentMutationVariables, TContext>,
+      headers?: RequestInit['headers']
+    ) =>
+    useMutation<UpdateCommentMutation, TError, UpdateCommentMutationVariables, TContext>(
+      ['updateComment'],
+      (variables?: UpdateCommentMutationVariables) => fetcher<UpdateCommentMutation, UpdateCommentMutationVariables>(client, UpdateCommentDocument, variables, headers)(),
+      options
+    );
 export const CreateCommentDocument = `
     mutation createComment($options: CommentsInputs!) {
   createComment(options: $options) {
@@ -148,6 +228,28 @@ export const useCreateCommentMutation = <
       (variables?: CreateCommentMutationVariables) => fetcher<CreateCommentMutation, CreateCommentMutationVariables>(client, CreateCommentDocument, variables, headers)(),
       options
     );
+export const MeDocument = `
+    query me {
+  me {
+    id
+    username
+  }
+}
+    `;
+export const useMeQuery = <
+      TData = MeQuery,
+      TError = unknown
+    >(
+      client: GraphQLClient,
+      variables?: MeQueryVariables,
+      options?: UseQueryOptions<MeQuery, TError, TData>,
+      headers?: RequestInit['headers']
+    ) =>
+    useQuery<MeQuery, TError, TData>(
+      variables === undefined ? ['me'] : ['me', variables],
+      fetcher<MeQuery, MeQueryVariables>(client, MeDocument, variables, headers),
+      options
+    );
 export const PostDocument = `
     query post($id: String!) {
   post(id: $id) {
@@ -156,6 +258,9 @@ export const PostDocument = `
       createdAt
       message
       parentId
+      likes {
+        userId
+      }
       user {
         id
         username

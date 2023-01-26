@@ -37,7 +37,7 @@ model Comment {
   postId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
-  parent    Comment?  @relation("ParentChild", fields: [parentId], references: [id])
+  parent    Comment?  @relation("ParentChild", fields: [parentId], references: [id], onDelete: Cascade)
   children  Comment[] @relation("ParentChild")
   parentId  String?
   likes     Likes[]

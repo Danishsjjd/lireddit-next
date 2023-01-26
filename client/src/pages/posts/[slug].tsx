@@ -11,6 +11,7 @@ import { dehydrate, QueryClient, useQueryClient } from "@tanstack/react-query"
 import { GetServerSideProps } from "next"
 import CommentForm from "@/components/CommentForm"
 import { Dispatch, SetStateAction } from "react"
+import { ClientError } from "graphql-request"
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const { slug } = ctx.query
@@ -32,7 +33,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 }
 
 const Post = () => {
-  const { post, rootComments, onPostCommentUpdates } = usePost()
+  const { post, rootComments, onPostCommentCreate, user } = usePost()
   const { mutate } = useCreateCommentMutation(graphqlRequest)
 
   const onSubmit = (
@@ -45,16 +46,19 @@ const Post = () => {
           message: message,
           postId: post?.post.id as string,
           parentId: null,
+          userId: user?.id as string,
         },
       },
       {
         onSuccess: ({ createComment }) => {
-          onPostCommentUpdates?.(createComment)
+          onPostCommentCreate?.(createComment)
           setMessage("")
         },
-        onError(error, variables, context) {
-          console.log("error is", error)
-        },
+        // onError(error, variables, context) {
+        // setError(
+        //   (error as ClientError)?.response?.errors?.[0]?.message as string
+        // )
+        // },
       }
     )
   }

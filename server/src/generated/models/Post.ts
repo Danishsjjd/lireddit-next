@@ -14,5 +14,6 @@ export class Post {
 
   @Field((_type) => [Comment])
   comments: Comment[]
-  // skip overwrite 👇
 }
+
+// skip overwrite 👇

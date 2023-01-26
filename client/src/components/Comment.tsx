@@ -1,11 +1,17 @@
-import { FaHeart, FaReply, FaEdit, FaTrash } from "react-icons/fa"
 import { Comment as CommentType, usePost } from "@/context/PostContext"
-import { IconBtn } from "./IconBtn"
-import { Dispatch, SetStateAction, useEffect, useState } from "react"
-import CommentList from "./CommentList"
-import CommentForm from "./CommentForm"
-import { useCreateCommentMutation } from "@/generated/graphql"
+import {
+  useCreateCommentMutation,
+  useDeleteCommentMutation,
+  useUpdateCommentMutation,
+} from "@/generated/graphql"
 import graphqlRequest from "@/libs/graphqlRequest"
+import showError from "@/utils/showError"
+import { ClientError } from "graphql-request"
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
+import { FaEdit, FaHeart, FaReply, FaTrash } from "react-icons/fa"
+import CommentForm from "./CommentForm"
+import CommentList from "./CommentList"
+import { IconBtn } from "./IconBtn"
 
 type Props = {
   comment: CommentType[number]
@@ -13,10 +19,23 @@ type Props = {
 
 const Comment = ({ comment }: Props) => {
   const { createdAt, id, message, user } = comment
-  const { commentsByParentId, post, onPostCommentUpdates } = usePost()
+  const {
+    commentsByParentId,
+    post,
+    onPostCommentCreate,
+    onPostCommentDelete,
+    onPostCommentUpdate,
+    user: currentUser,
+  } = usePost()
   const [ariaHidden, setAriaHidden] = useState(false)
   const [isReplying, setIsReplying] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
   const { mutate, isLoading } = useCreateCommentMutation(graphqlRequest)
+  const { mutate: updateCommentFunc, isLoading: isUpdatingLoading } =
+    useUpdateCommentMutation(graphqlRequest)
+  const { mutate: deleteCurrentComment } =
+    useDeleteCommentMutation(graphqlRequest)
+  const [error, setError] = useState<string | false>(false)
 
   const childComments = commentsByParentId?.[id]
 
@@ -46,13 +65,43 @@ const Comment = ({ comment }: Props) => {
           message: msg,
           postId: post?.post.id as string,
           parentId: id,
+          userId: currentUser?.id as string,
         },
       },
       {
         onSuccess({ createComment }) {
-          onPostCommentUpdates?.(createComment)
+          onPostCommentCreate?.(createComment)
           setMsg("")
           setIsReplying(false)
+        },
+      }
+    )
+  }
+
+  const deleteComment = () => {
+    deleteCurrentComment(
+      { commentId: id },
+      {
+        onSuccess() {
+          onPostCommentDelete?.(id)
+        },
+        onError(error, variables, context) {
+          setError(showError(error as ClientError))
+        },
+      }
+    )
+  }
+
+  const updateComment = (msg: string) => {
+    updateCommentFunc(
+      { options: { commentId: id, msg: msg } },
+      {
+        onError: (err) => {
+          setError(showError(err as ClientError))
+        },
+        onSuccess: () => {
+          onPostCommentUpdate?.(id, msg)
+          setIsUpdating(false)
         },
       }
     )
@@ -65,7 +114,19 @@ const Comment = ({ comment }: Props) => {
           <span className=" font-bold">{user.username}</span>
           <span className="date">{clientCreatedAt}</span>
         </header>
-        <div className="mx-2 whitespace-pre-wrap">{message}</div>
+        <div className="mx-2 whitespace-pre-wrap">
+          {isUpdating ? (
+            <CommentForm
+              error=""
+              loading={isUpdatingLoading}
+              onSubmit={updateComment}
+              autoFocus
+              initialValue={comment.message}
+            />
+          ) : (
+            message
+          )}
+        </div>
         <footer className="mt-2 flex gap-1">
           <IconBtn isActive={false} Icon={FaHeart}>
             2
@@ -75,18 +136,36 @@ const Comment = ({ comment }: Props) => {
             isActive={isReplying}
             Icon={FaReply}
           />
-          <IconBtn isActive={false} Icon={FaEdit} />
-          <IconBtn isActive={false} Icon={FaTrash} color="danger" />
+          {user.id === currentUser?.id && (
+            <>
+              <IconBtn
+                isActive={false}
+                Icon={FaEdit}
+                onClick={() => setIsUpdating((pre) => !pre)}
+              />
+              <IconBtn
+                isActive={false}
+                Icon={FaTrash}
+                color="danger"
+                onClick={deleteComment}
+              />
+            </>
+          )}
         </footer>
+        {error && (
+          <span className="text-lg font-medium text-red-600">{error}</span>
+        )}
       </div>
       {isReplying && (
-        <CommentForm
-          error=""
-          loading={isLoading}
-          onSubmit={onNestedCommentCreation}
-          autoFocus
-          initialValue=""
-        />
+        <div className="mt-3">
+          <CommentForm
+            error=""
+            loading={isLoading}
+            onSubmit={onNestedCommentCreation}
+            autoFocus
+            initialValue=""
+          />
+        </div>
       )}
       {childComments && childComments?.length > 0 && (
         <>

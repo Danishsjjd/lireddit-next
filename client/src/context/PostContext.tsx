@@ -1,4 +1,10 @@
-import { PostQuery, usePostQuery } from "@/generated/graphql"
+import {
+  CreateCommentMutation,
+  MeQuery,
+  PostQuery,
+  useMeQuery,
+  usePostQuery,
+} from "@/generated/graphql"
 import graphqlRequest from "@/libs/graphqlRequest"
 import { useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/router"
@@ -14,7 +20,12 @@ type ContextType = {
   post?: PostQuery
   rootComments?: Comment
   commentsByParentId?: Record<any, Comment>
-  onPostCommentUpdates?: (comment: Comment[number]) => void
+  onPostCommentCreate?: (
+    comment: CreateCommentMutation["createComment"]
+  ) => void
+  onPostCommentUpdate?: (id: string, msg: string) => void
+  onPostCommentDelete?: (id: string) => void
+  user?: MeQuery["me"] | undefined
 }
 
 const Context = createContext<ContextType>({})
@@ -28,6 +39,7 @@ export function PostProvider({ children }: Props) {
   const { query } = useRouter()
   const { slug } = query
   const { data: post } = usePostQuery(graphqlRequest, { id: slug as string })
+  const { data: user } = useMeQuery(graphqlRequest)
 
   const { post: postData } = post as PostQuery
 
@@ -42,19 +54,26 @@ export function PostProvider({ children }: Props) {
 
   const rootComments = commentsByParentId["null"]
 
-  const onPostCommentUpdates = ({
+  const onPostCommentCreate = ({
     createdAt,
     id,
     message,
     user,
     parentId,
-  }: Comment[number]) => {
+  }: CreateCommentMutation["createComment"]) => {
     queryClient.setQueryData<PostQuery>(
       ["post", { id: post?.post.id }],
       (data) => {
         if (data?.post.comments) {
           const newComments = [
-            { createdAt, id, message, user, parentId: parentId || null },
+            {
+              createdAt,
+              id,
+              message,
+              user,
+              parentId: parentId || null,
+              likes: [],
+            },
             ...data?.post.comments,
           ]
           return {
@@ -69,9 +88,57 @@ export function PostProvider({ children }: Props) {
     )
   }
 
+  const onPostCommentUpdate = (id: string, msg: string) => {
+    queryClient.setQueryData<PostQuery>(
+      ["post", { id: post?.post.id }],
+      (data) => {
+        if (data) {
+          const updatedComments = data.post.comments.map((comment) => {
+            if (comment.id === id) return { ...comment, message: msg }
+            return comment
+          })
+          return {
+            ...data,
+            post: {
+              ...data.post,
+              comments: updatedComments,
+            },
+          }
+        } else return data
+      }
+    )
+  }
+
+  const onPostCommentDelete = (id: string) => {
+    queryClient.setQueryData<PostQuery>(
+      ["post", { id: post?.post.id as string }],
+      (data) => {
+        if (data) {
+          const newData: PostQuery["post"]["comments"] =
+            data?.post.comments.filter((comment) => comment.id !== id) || []
+          return {
+            ...data,
+            post: {
+              ...data.post,
+              comments: newData,
+            },
+          }
+        }
+      }
+    )
+  }
+
   return (
     <Context.Provider
-      value={{ post, rootComments, commentsByParentId, onPostCommentUpdates }}
+      value={{
+        post,
+        rootComments,
+        commentsByParentId,
+        onPostCommentCreate,
+        onPostCommentDelete,
+        onPostCommentUpdate,
+        user: user?.me,
+      }}
     >
       {children}
     </Context.Provider>

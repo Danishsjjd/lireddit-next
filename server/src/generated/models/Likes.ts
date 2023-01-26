@@ -1,6 +1,6 @@
-import { Field, ObjectType, ID } from 'type-graphql'
-import { User } from './User'
-import { Comment } from './Comment'
+import { Field, ObjectType, ID } from "type-graphql"
+import { User } from "./User"
+import { Comment } from "./Comment"
 
 @ObjectType()
 export class Likes {
@@ -18,6 +18,6 @@ export class Likes {
 
   @Field()
   commentId: string
-
-  // skip overwrite 👇
 }
+
+// skip overwrite 👇
