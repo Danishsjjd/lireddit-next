@@ -1,6 +1,7 @@
 import { PrismaClient } from ".prisma/client"
+import { Request } from "express"
 
 export type MyContext = {
   prisma: PrismaClient
-  userId: string
+  req: Request
 }

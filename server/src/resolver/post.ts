@@ -2,7 +2,7 @@ import { Ctx, Query, Resolver, Arg, Info } from "type-graphql"
 import { Post } from "../generated/models/Post"
 import { MyContext } from "../type"
 import { GraphQLResolveInfo } from "graphql"
-import { extractKey } from "./extractKey"
+import { extractKey } from "../utils/extractKey"
 
 @Resolver()
 class PostResolver {

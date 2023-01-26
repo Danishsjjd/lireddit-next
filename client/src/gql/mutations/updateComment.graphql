@@ -1,0 +1,3 @@
+mutation updateComment($options: CommentModify!) {
+  updateComment(options: $options)
+}
