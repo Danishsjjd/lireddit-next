@@ -26,6 +26,11 @@ type ContextType = {
   onPostCommentUpdate?: (id: string, msg: string) => void
   onPostCommentDelete?: (id: string) => void
   user?: MeQuery["me"] | undefined
+  onToggleLike?: (
+    userId: string,
+    likeOrDisLike: boolean,
+    commentId: string
+  ) => void
 }
 
 const Context = createContext<ContextType>({})
@@ -36,8 +41,10 @@ export function usePost() {
 
 export function PostProvider({ children }: Props) {
   const queryClient = useQueryClient()
+
   const { query } = useRouter()
   const { slug } = query
+
   const { data: post } = usePostQuery(graphqlRequest, { id: slug as string })
   const { data: user } = useMeQuery(graphqlRequest)
 
@@ -128,6 +135,35 @@ export function PostProvider({ children }: Props) {
     )
   }
 
+  const onToggleLike = (
+    userId: string,
+    likeOrDisLike: boolean,
+    commentId: string
+  ) => {
+    queryClient.setQueryData<PostQuery>(
+      ["post", { id: post?.post.id as string }],
+      (data) => {
+        if (data) {
+          const updatedComments = data.post.comments.map((comment) => {
+            if (commentId === comment.id) {
+              if (likeOrDisLike)
+                return { ...comment, likes: [...comment.likes, { userId }] }
+              else {
+                const newLike = comment.likes.filter(
+                  (user) => user.userId !== userId
+                )
+                return { ...comment, likes: newLike }
+              }
+            }
+            return comment
+          })
+          return { ...data, post: { ...data.post, comments: updatedComments } }
+        }
+        return data
+      }
+    )
+  }
+
   return (
     <Context.Provider
       value={{
@@ -137,6 +173,7 @@ export function PostProvider({ children }: Props) {
         onPostCommentCreate,
         onPostCommentDelete,
         onPostCommentUpdate,
+        onToggleLike,
         user: user?.me,
       }}
     >

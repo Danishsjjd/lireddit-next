@@ -35,6 +35,8 @@ class CommentsResolver {
   ) {
     const { message, parentId, postId, userId } = options
 
+    if (message.length < 1) throw new Error("Message is required")
+
     const results = await prisma.comment.create({
       data: { message, parentId, postId, userId },
       include: { user: true },
@@ -53,7 +55,6 @@ class CommentsResolver {
       where: { id: commentId },
       select: { id: true, message: true, userId: true },
     })
-    console.log("comment", comment)
     if (!comment) throw new Error("comment is not exists")
     if (comment.userId !== req.session.userId)
       throw new Error("you cannot edit others comments")

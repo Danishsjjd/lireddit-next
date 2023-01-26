@@ -126,6 +126,13 @@ export type DeleteCommentMutationVariables = Exact<{
 
 export type DeleteCommentMutation = { __typename?: 'Mutation', deleteComment: boolean };
 
+export type ToggleLikeOnCommentMutationVariables = Exact<{
+  commentId: Scalars['String'];
+}>;
+
+
+export type ToggleLikeOnCommentMutation = { __typename?: 'Mutation', likeComment: boolean };
+
 export type UpdateCommentMutationVariables = Exact<{
   options: CommentModify;
 }>;
@@ -180,6 +187,24 @@ export const useDeleteCommentMutation = <
     useMutation<DeleteCommentMutation, TError, DeleteCommentMutationVariables, TContext>(
       ['deleteComment'],
       (variables?: DeleteCommentMutationVariables) => fetcher<DeleteCommentMutation, DeleteCommentMutationVariables>(client, DeleteCommentDocument, variables, headers)(),
+      options
+    );
+export const ToggleLikeOnCommentDocument = `
+    mutation toggleLikeOnComment($commentId: String!) {
+  likeComment(commentId: $commentId)
+}
+    `;
+export const useToggleLikeOnCommentMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(
+      client: GraphQLClient,
+      options?: UseMutationOptions<ToggleLikeOnCommentMutation, TError, ToggleLikeOnCommentMutationVariables, TContext>,
+      headers?: RequestInit['headers']
+    ) =>
+    useMutation<ToggleLikeOnCommentMutation, TError, ToggleLikeOnCommentMutationVariables, TContext>(
+      ['toggleLikeOnComment'],
+      (variables?: ToggleLikeOnCommentMutationVariables) => fetcher<ToggleLikeOnCommentMutation, ToggleLikeOnCommentMutationVariables>(client, ToggleLikeOnCommentDocument, variables, headers)(),
       options
     );
 export const UpdateCommentDocument = `

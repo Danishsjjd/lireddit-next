@@ -2,7 +2,7 @@ import { Dispatch, FormEventHandler, SetStateAction, useState } from "react"
 
 type Props = {
   loading: boolean
-  error: string
+  error?: string
   autoFocus?: boolean
   onSubmit: (
     message: string,

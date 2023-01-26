@@ -1,5 +1,5 @@
-import { IconType } from "react-icons"
 import React from "react"
+import { IconType } from "react-icons"
 
 const colors = {
   danger: "text-red-600",

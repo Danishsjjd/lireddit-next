@@ -1,0 +1,3 @@
+mutation toggleLikeOnComment($commentId: String!) {
+  likeComment(commentId: $commentId)
+}

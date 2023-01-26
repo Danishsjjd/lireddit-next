@@ -2,6 +2,7 @@ import { Comment as CommentType, usePost } from "@/context/PostContext"
 import {
   useCreateCommentMutation,
   useDeleteCommentMutation,
+  useToggleLikeOnCommentMutation,
   useUpdateCommentMutation,
 } from "@/generated/graphql"
 import graphqlRequest from "@/libs/graphqlRequest"
@@ -9,6 +10,7 @@ import showError from "@/utils/showError"
 import { ClientError } from "graphql-request"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { FaEdit, FaHeart, FaReply, FaTrash } from "react-icons/fa"
+import { FiHeart } from "react-icons/fi"
 import CommentForm from "./CommentForm"
 import CommentList from "./CommentList"
 import { IconBtn } from "./IconBtn"
@@ -16,6 +18,11 @@ import { IconBtn } from "./IconBtn"
 type Props = {
   comment: CommentType[number]
 }
+
+const dateFormatter = Intl.DateTimeFormat("eng", {
+  dateStyle: "medium",
+  timeStyle: "short",
+})
 
 const Comment = ({ comment }: Props) => {
   const { createdAt, id, message, user } = comment
@@ -25,28 +32,31 @@ const Comment = ({ comment }: Props) => {
     onPostCommentCreate,
     onPostCommentDelete,
     onPostCommentUpdate,
+    onToggleLike,
     user: currentUser,
   } = usePost()
-  const [ariaHidden, setAriaHidden] = useState(false)
-  const [isReplying, setIsReplying] = useState(false)
-  const [isUpdating, setIsUpdating] = useState(false)
-  const { mutate, isLoading } = useCreateCommentMutation(graphqlRequest)
-  const { mutate: updateCommentFunc, isLoading: isUpdatingLoading } =
-    useUpdateCommentMutation(graphqlRequest)
-  const { mutate: deleteCurrentComment } =
-    useDeleteCommentMutation(graphqlRequest)
-  const [error, setError] = useState<string | false>(false)
 
   const childComments = commentsByParentId?.[id]
 
-  const dateFormatter = Intl.DateTimeFormat("eng", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  })
-
+  const [ariaHidden, setAriaHidden] = useState(false)
+  const [isReplying, setIsReplying] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [error, setError] = useState<string | false>(false)
   const [clientCreatedAt, setClientCreatedAt] = useState(
     dateFormatter.format(Date.parse(createdAt)).slice(0, -3)
   )
+
+  const { mutate: CreateCommentFunc, isLoading } =
+    useCreateCommentMutation(graphqlRequest)
+
+  const { mutate: updateCommentFunc, isLoading: isUpdatingLoading } =
+    useUpdateCommentMutation(graphqlRequest)
+
+  const { mutate: deleteCurrentComment } =
+    useDeleteCommentMutation(graphqlRequest)
+
+  const { mutate: toggleLikeFunc } =
+    useToggleLikeOnCommentMutation(graphqlRequest)
 
   // ? node.js provide different character in space while browser
   // ? provide different so first browser paint not match that's
@@ -59,7 +69,7 @@ const Comment = ({ comment }: Props) => {
     msg: string,
     setMsg: Dispatch<SetStateAction<string>>
   ) {
-    mutate(
+    CreateCommentFunc(
       {
         options: {
           message: msg,
@@ -85,7 +95,7 @@ const Comment = ({ comment }: Props) => {
         onSuccess() {
           onPostCommentDelete?.(id)
         },
-        onError(error, variables, context) {
+        onError(error) {
           setError(showError(error as ClientError))
         },
       }
@@ -107,6 +117,21 @@ const Comment = ({ comment }: Props) => {
     )
   }
 
+  const toggleLike = () => {
+    toggleLikeFunc(
+      { commentId: id },
+      {
+        onSuccess({ likeComment }) {
+          onToggleLike?.(currentUser?.id as string, likeComment, id)
+        },
+      }
+    )
+  }
+
+  const isCurrentLikeIt =
+    comment.likes.filter(({ userId }) => userId == (currentUser?.id as string))
+      .length > 0
+
   return (
     <>
       <div className="rounded-lg border p-2">
@@ -117,7 +142,6 @@ const Comment = ({ comment }: Props) => {
         <div className="mx-2 whitespace-pre-wrap">
           {isUpdating ? (
             <CommentForm
-              error=""
               loading={isUpdatingLoading}
               onSubmit={updateComment}
               autoFocus
@@ -128,8 +152,12 @@ const Comment = ({ comment }: Props) => {
           )}
         </div>
         <footer className="mt-2 flex gap-1">
-          <IconBtn isActive={false} Icon={FaHeart}>
-            2
+          <IconBtn
+            isActive={false}
+            Icon={isCurrentLikeIt ? FaHeart : FiHeart}
+            onClick={toggleLike}
+          >
+            {comment.likes.length.toString()}
           </IconBtn>
           <IconBtn
             onClick={() => setIsReplying((pre) => !pre)}
@@ -159,7 +187,6 @@ const Comment = ({ comment }: Props) => {
       {isReplying && (
         <div className="mt-3">
           <CommentForm
-            error=""
             loading={isLoading}
             onSubmit={onNestedCommentCreation}
             autoFocus
