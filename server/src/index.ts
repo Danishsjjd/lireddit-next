@@ -10,6 +10,10 @@ async function main() {
 
   middleware(app, prisma)
 
+  app.get("/", (_, res) => {
+    res.send("API's working")
+  })
+
   app.listen(port, () => {
     if (!__prod__) console.log(`server is running at ${port}`)
   })

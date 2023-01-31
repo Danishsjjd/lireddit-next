@@ -6,6 +6,7 @@ export const ErrorInterceptor: MiddlewareFn = async ({}, next) => {
     return await next()
   } catch (err) {
     const e = err as Error
+    // TODO: log error to file
 
     return new GraphQLError(e.message)
   }

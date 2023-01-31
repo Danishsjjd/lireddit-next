@@ -1,48 +1,27 @@
-import { Mutation, Resolver, Arg, InputType, Field, Ctx } from "type-graphql"
+import { Arg, Ctx, Mutation, Resolver, UseMiddleware } from "type-graphql"
 import { Comment } from "../generated/models/Comment"
+import { isAuthenticated } from "../middleware/isAuthenticated"
 import { MyContext } from "../type"
-
-@InputType()
-class CommentsInputs {
-  @Field({ nullable: true })
-  parentId: string
-
-  @Field()
-  message: string
-
-  @Field()
-  postId: string
-
-  @Field()
-  userId: string
-}
-
-@InputType()
-class CommentModify {
-  @Field()
-  commentId: string
-
-  @Field()
-  msg: string
-}
+import { CommentModify, CommentsInputs } from "../types/comments"
 
 @Resolver()
 class CommentsResolver {
   @Mutation(() => Comment)
+  @UseMiddleware(isAuthenticated)
   async createComment(
     @Arg("options") options: CommentsInputs,
-    @Ctx() { prisma }: MyContext
+    @Ctx() { prisma, req }: MyContext
   ) {
-    const { message, parentId, postId, userId } = options
+    const { message, parentId, postId } = options
 
     if (message.length < 1) throw new Error("Message is required")
 
     const results = await prisma.comment.create({
-      data: { message, parentId, postId, userId },
+      data: { message, parentId, postId, userId: req.session.userId as string },
       include: { user: true },
     })
 
-    return results
+    return { data: results }
   }
 
   @Mutation(() => Boolean)

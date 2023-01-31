@@ -1,7 +1,8 @@
-import { Field, ObjectType, ID } from "type-graphql"
-import { Post } from "./Post"
-import { User } from "./User"
-import { Likes } from "./Likes"
+import { Field, ObjectType, ID } from 'type-graphql'
+import { Post } from './Post'
+import { User } from './User'
+
+import { Likes } from './Likes'
 
 @ObjectType()
 export class Comment {
@@ -20,13 +21,13 @@ export class Comment {
   @Field((_type) => Post, { nullable: true })
   post: Post
 
-  @Field({ nullable: true })
+  @Field()
   postId: string
 
   @Field((_type) => User, { nullable: true })
   user: User
 
-  @Field({ nullable: true })
+  @Field()
   userId: string
 
   @Field((_type) => Comment, { nullable: true })

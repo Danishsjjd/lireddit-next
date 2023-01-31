@@ -2,6 +2,7 @@ import { Field, ObjectType, ID } from "type-graphql"
 import { Comment } from "./Comment"
 import { Likes } from "./Likes"
 import { Post } from "./Post"
+import { Points } from "./Points"
 
 @ObjectType()
 export class User {
@@ -12,13 +13,16 @@ export class User {
   username: string
 
   @Field((_type) => [Comment], { nullable: true })
-  comments: Comment[]
+  comments?: Comment[]
 
   @Field((_type) => [Likes], { nullable: true })
-  likes: Likes[]
+  likes?: Likes[]
 
   @Field((_type) => [Post], { nullable: true })
-  post: Post[]
+  post?: Post[]
+
+  @Field((_type) => [Points], { nullable: true })
+  points?: Points[]
 
   // skip overwrite 👇
 }

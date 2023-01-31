@@ -1,20 +1,20 @@
 import { Field, ObjectType } from 'type-graphql'
 import { User } from './User'
-import { Comment } from './Comment'
+import { Post } from './Post'
 
 @ObjectType()
-export class Likes {
+export class Points {
   @Field((_type) => User, { nullable: true })
   user: User
 
   @Field()
   userId: string
 
-  @Field((_type) => Comment, { nullable: true })
-  comment: Comment
+  @Field((_type) => Post, { nullable: true })
+  post: Post
 
   @Field()
-  commentId: string
+  postId: string
 
   // skip overwrite 👇
 }
