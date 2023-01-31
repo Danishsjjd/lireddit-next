@@ -17,28 +17,29 @@ export class Comment {
   @Field()
   message: string
 
-  @Field((_type) => Post)
+  @Field((_type) => Post, { nullable: true })
   post: Post
 
-  @Field()
+  @Field({ nullable: true })
   postId: string
 
-  @Field((_type) => User)
+  @Field((_type) => User, { nullable: true })
   user: User
 
-  @Field()
+  @Field({ nullable: true })
   userId: string
 
   @Field((_type) => Comment, { nullable: true })
   parent?: Comment
 
-  @Field((_type) => [Comment])
+  @Field((_type) => [Comment], { nullable: true })
   children: Comment[]
 
   @Field({ nullable: true })
   parentId?: string
 
-  @Field((_type) => [Likes])
+  @Field((_type) => [Likes], { nullable: true })
   likes: Likes[]
+
+  // skip overwrite 👇
 }
-// skip overwrite 👇

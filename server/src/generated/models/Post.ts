@@ -1,5 +1,6 @@
 import { Field, ObjectType, ID } from "type-graphql"
 import { Comment } from "./Comment"
+import { User } from "./User"
 
 @ObjectType()
 export class Post {
@@ -12,8 +13,14 @@ export class Post {
   @Field()
   body: string
 
-  @Field((_type) => [Comment])
+  @Field((_type) => [Comment], { nullable: true })
   comments: Comment[]
-}
 
-// skip overwrite 👇
+  @Field((_type) => User, { nullable: true })
+  User: User
+
+  @Field({ nullable: true })
+  userId: string
+
+  // skip overwrite 👇
+}

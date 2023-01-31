@@ -7,17 +7,17 @@ export class Likes {
   @Field((_type) => ID)
   id: string
 
-  @Field((_type) => User)
+  @Field((_type) => User, { nullable: true })
   user: User
 
-  @Field()
+  @Field({ nullable: true })
   userId: string
 
-  @Field((_type) => Comment)
+  @Field((_type) => Comment, { nullable: true })
   comment: Comment
 
-  @Field()
+  @Field({ nullable: true })
   commentId: string
-}
 
-// skip overwrite 👇
+  // skip overwrite 👇
+}

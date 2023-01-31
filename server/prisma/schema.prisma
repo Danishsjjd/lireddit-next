@@ -17,15 +17,26 @@ datasource db {
 model User {
   id       String    @id @default(uuid())
   username String    @unique
+  // @nullable
   comments Comment[]
+  // @nullable
   likes    Likes[]
+  // @skip
+  password String    @db.Text
+  // @nullable
+  post     Post[]
 }
 
 model Post {
   id       String    @id @default(uuid())
   title    String    @db.Text
   body     String    @db.Text
+  // @nullable
   comments Comment[]
+  // @nullable
+  User     User      @relation(fields: [userId], references: [id])
+  // @nullable
+  userId   String
 }
 
 model Comment {
@@ -33,21 +44,33 @@ model Comment {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   message   String    @db.Text
+  // @nullable
   post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  // @nullable
   postId    String
+  // @nullable
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // @nullable
   userId    String
+  // @nullable
   parent    Comment?  @relation("ParentChild", fields: [parentId], references: [id], onDelete: Cascade)
+  // @nullable
   children  Comment[] @relation("ParentChild")
+  // @nullable
   parentId  String?
+  // @nullable
   likes     Likes[]
 }
 
 model Likes {
   id        String  @id @default(uuid())
+  // @nullable
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // @nullable
   userId    String
+  // @nullable
   comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  // @nullable
   commentId String
 
   @@unique([userId, commentId])
