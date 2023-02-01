@@ -1,17 +1,17 @@
-import { Field, ObjectType } from 'type-graphql'
-import { User } from './User'
-import { Comment } from './Comment'
+import { Field, ObjectType } from "type-graphql"
+import { User } from "./User"
+import { Comment } from "./Comment"
 
 @ObjectType()
 export class Likes {
   @Field((_type) => User, { nullable: true })
-  user: User
+  user?: User
 
   @Field()
   userId: string
 
   @Field((_type) => Comment, { nullable: true })
-  comment: Comment
+  comment?: Comment
 
   @Field()
   commentId: string

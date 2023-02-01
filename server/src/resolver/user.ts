@@ -60,25 +60,16 @@ class userResolver {
 
     const hashedPassword = await hash(password as string)
 
-    try {
-      const user = await prisma.user.create({
-        data: {
-          password: hashedPassword,
-          username: username as string,
-        },
-      })
-      req.session.userId = user.id
-      return { user }
-    } catch (err) {
-      const e = err as any
-      if (e.code === "P2002" && e.message.includes("Unique constraint failed"))
-        return {
-          errors: [{ field: "username", message: "username is already taken" }],
-        }
-      return {
-        errors: [{ field: "server", message: "server error" }],
-      }
-    }
+    const user = await prisma.user.create({
+      data: {
+        password: hashedPassword,
+        username: username as string,
+      },
+    })
+
+    req.session.userId = user.id
+
+    return { user }
   }
 
   @Mutation(() => Boolean)

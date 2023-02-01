@@ -8,7 +8,7 @@ export const isAuthenticated: MiddlewareFn<MyContext> = async (
 ): Promise<{ errors: FieldErrors[] }> => {
   if (!req.session.userId)
     return {
-      errors: [{ field: "user", message: "must be authenticated" }],
+      errors: [{ field: "user", message: "Must be authenticated" }],
     }
 
   return next()

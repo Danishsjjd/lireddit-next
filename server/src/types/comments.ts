@@ -10,9 +10,6 @@ export class CommentsInputs {
 
   @Field()
   postId: string
-
-  @Field()
-  userId: string
 }
 
 @InputType()

@@ -11,7 +11,7 @@ class PostResolver {
     const [postSelect, commentsSelect] = extractKey(info, "comments")
 
     if (commentsSelect) {
-      const res = await prisma.post.findMany({
+      const postWithComments = await prisma.post.findMany({
         select: {
           ...postSelect,
           comments: !commentsSelect
@@ -26,8 +26,9 @@ class PostResolver {
               },
         },
       })
-      return res
-    } else return prisma.post.findMany()
+      return postWithComments
+    }
+    return prisma.post.findMany()
   }
 
   @Query(() => Post)
@@ -56,7 +57,9 @@ class PostResolver {
             },
       },
     })
+
     if (res === null) throw new Error("post id is not correct")
+
     return res
   }
 }

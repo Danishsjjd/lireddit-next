@@ -1,8 +1,8 @@
-import { Field, ObjectType, ID } from 'type-graphql'
-import { Post } from './Post'
-import { User } from './User'
+import { Field, ObjectType, ID } from "type-graphql"
+import { Post } from "./Post"
+import { User } from "./User"
 
-import { Likes } from './Likes'
+import { Likes } from "./Likes"
 
 @ObjectType()
 export class Comment {
@@ -19,13 +19,13 @@ export class Comment {
   message: string
 
   @Field((_type) => Post, { nullable: true })
-  post: Post
+  post?: Post
 
   @Field()
   postId: string
 
   @Field((_type) => User, { nullable: true })
-  user: User
+  user?: User
 
   @Field()
   userId: string
@@ -34,13 +34,13 @@ export class Comment {
   parent?: Comment
 
   @Field((_type) => [Comment], { nullable: true })
-  children: Comment[]
+  children?: Comment[]
 
-  @Field({ nullable: true })
-  parentId?: string
+  @Field(() => String, { nullable: true })
+  parentId: string | null
 
   @Field((_type) => [Likes], { nullable: true })
-  likes: Likes[]
+  likes?: Likes[]
 
   // skip overwrite 👇
 }
