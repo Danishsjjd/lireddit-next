@@ -155,12 +155,9 @@ class PostResolver {
         errors: [{ field: "user", message: "you cannot delete others post" }],
       }
 
-    await prisma.points.delete({
+    await prisma.post.delete({
       where: {
-        userId_postId: {
-          userId: req.session.userId as string,
-          postId,
-        },
+        id: postId,
       },
     })
 
