@@ -139,6 +139,34 @@ class PostResolver {
     return { isHappen: true }
   }
 
+  @Mutation(() => BooleanResponse)
+  @UseMiddleware(isAuthenticated)
+  async deletePost(
+    @Ctx() { prisma, req }: MyContext,
+    @Arg("postId") postId: string
+  ): Promise<BooleanResponse> {
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { userId: true, id: true },
+    })
+
+    if (post?.userId !== req.session.userId)
+      return {
+        errors: [{ field: "user", message: "you cannot delete others post" }],
+      }
+
+    await prisma.points.delete({
+      where: {
+        userId_postId: {
+          userId: req.session.userId as string,
+          postId,
+        },
+      },
+    })
+
+    return { isHappen: true }
+  }
+
   @Mutation(() => PointResponse)
   @UseMiddleware(isAuthenticated)
   async changePoints(

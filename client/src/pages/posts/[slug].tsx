@@ -43,7 +43,6 @@ const Post = () => {
           message: message,
           postId: post?.post.id as string,
           parentId: null,
-          userId: user?.id as string,
         },
       },
       {

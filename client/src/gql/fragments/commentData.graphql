@@ -9,6 +9,5 @@ fragment commentData on Comment {
   user {
     id
     username
-    email
   }
 }

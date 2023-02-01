@@ -16,7 +16,7 @@ import CommentList from "./CommentList"
 import { IconBtn } from "./IconBtn"
 
 type Props = {
-  comment: CommentType[number]
+  comment: Exclude<Exclude<CommentType, null>, undefined>[number]
 }
 
 const dateFormatter = Intl.DateTimeFormat("eng", {
@@ -75,7 +75,6 @@ const Comment = ({ comment }: Props) => {
           message: msg,
           postId: post?.post.id as string,
           parentId: id,
-          userId: currentUser?.id as string,
         },
       },
       {
@@ -121,22 +120,29 @@ const Comment = ({ comment }: Props) => {
     toggleLikeFunc(
       { commentId: id },
       {
-        onSuccess({ likeComment }) {
-          onToggleLike?.(currentUser?.id as string, likeComment, id)
+        onSuccess({ changeLikeOnComment }) {
+          onToggleLike?.(
+            currentUser?.user?.id as string,
+            changeLikeOnComment.isHappen || false,
+            id
+          )
         },
       }
     )
   }
 
-  const isCurrentLikeIt = comment.likes.some(
-    ({ userId }) => userId == (currentUser?.id as string)
-  )
+  let isCurrentLikeIt = null
+  if (comment.likes) {
+    isCurrentLikeIt = comment.likes.some(
+      ({ userId }) => userId == (currentUser?.user?.id as string)
+    )
+  }
 
   return (
     <>
       <div className="rounded-lg border p-2">
         <header className="mb-2 flex justify-between text-purple-500">
-          <span className=" font-bold">{user.username}</span>
+          <span className=" font-bold">{user?.username}</span>
           <span className="date">{clientCreatedAt}</span>
         </header>
         <div className="mx-2 whitespace-pre-wrap">
@@ -157,14 +163,14 @@ const Comment = ({ comment }: Props) => {
             Icon={isCurrentLikeIt ? FaHeart : FiHeart}
             onClick={toggleLike}
           >
-            {comment.likes.length.toString()}
+            {comment.likes && comment.likes.length.toString()}
           </IconBtn>
           <IconBtn
             onClick={() => setIsReplying((pre) => !pre)}
             isActive={isReplying}
             Icon={FaReply}
           />
-          {user.id === currentUser?.id && (
+          {user?.id === currentUser?.user?.id && (
             <>
               <IconBtn
                 isActive={false}

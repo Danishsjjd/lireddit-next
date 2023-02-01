@@ -52,9 +52,9 @@ export function PostProvider({ children }: Props) {
 
   const commentsByParentId = useMemo(() => {
     const group: Record<any, Comment> = {}
-    postData.comments.forEach((comment) => {
-      group[comment.parentId as string] ||= []
-      group[comment.parentId as string].push(comment)
+    postData.comments?.forEach((comment) => {
+      group[`${comment.parentId}`] ||= []
+      group[`${comment.parentId}`]?.push(comment)
     })
     return group
   }, [postData.comments])
@@ -62,32 +62,34 @@ export function PostProvider({ children }: Props) {
   const rootComments = commentsByParentId["null"]
 
   const onPostCommentCreate = ({
-    createdAt,
-    id,
-    message,
-    user,
-    parentId,
+    comments,
   }: CreateCommentMutation["createComment"]) => {
     queryClient.setQueryData<PostQuery>(
       ["post", { id: post?.post.id }],
       (data) => {
         if (data?.post.comments) {
-          const newComments = [
-            {
-              createdAt,
-              id,
-              message,
-              user,
-              parentId: parentId || null,
-              likes: [],
-            },
-            ...data?.post.comments,
-          ]
-          return {
-            post: {
-              ...data?.post,
-              comments: newComments,
-            },
+          if (comments) {
+            const { createdAt, id, message, parentId } = comments
+            const newComments: PostQuery["post"]["comments"] = [
+              {
+                createdAt,
+                id,
+                message,
+                user: {
+                  id: user?.me.user?.id as string,
+                  username: user?.me.user?.username as string,
+                },
+                parentId: parentId || null,
+                likes: [],
+              },
+              ...data.post.comments,
+            ]
+            return {
+              post: {
+                ...data.post,
+                comments: newComments,
+              },
+            }
           }
         }
         return data
@@ -100,18 +102,21 @@ export function PostProvider({ children }: Props) {
       ["post", { id: post?.post.id }],
       (data) => {
         if (data) {
-          const updatedComments = data.post.comments.map((comment) => {
-            if (comment.id === id) return { ...comment, message: msg }
-            return comment
-          })
-          return {
-            ...data,
-            post: {
-              ...data.post,
-              comments: updatedComments,
-            },
-          }
-        } else return data
+          if (data.post.comments) {
+            const updatedComments = data.post.comments.map((comment) => {
+              if (comment.id === id) return { ...comment, message: msg }
+              return comment
+            })
+            return {
+              ...data,
+              post: {
+                ...data.post,
+                comments: updatedComments,
+              },
+            }
+          } else return data
+        }
+        return data
       }
     )
   }
@@ -121,16 +126,19 @@ export function PostProvider({ children }: Props) {
       ["post", { id: post?.post.id as string }],
       (data) => {
         if (data) {
-          const newData: PostQuery["post"]["comments"] =
-            data?.post.comments.filter((comment) => comment.id !== id) || []
-          return {
-            ...data,
-            post: {
-              ...data.post,
-              comments: newData,
-            },
+          if (data.post.comments) {
+            const newData: PostQuery["post"]["comments"] =
+              data?.post.comments.filter((comment) => comment.id !== id) || []
+            return {
+              ...data,
+              post: {
+                ...data.post,
+                comments: newData,
+              },
+            }
           }
         }
+        return data
       }
     )
   }
@@ -143,13 +151,16 @@ export function PostProvider({ children }: Props) {
     queryClient.setQueryData<PostQuery>(
       ["post", { id: post?.post.id as string }],
       (data) => {
-        if (data) {
+        if (data && data.post.comments) {
           const updatedComments = data.post.comments.map((comment) => {
             if (commentId === comment.id) {
               if (likeOrDisLike)
-                return { ...comment, likes: [...comment.likes, { userId }] }
+                return {
+                  ...comment,
+                  likes: [...(comment?.likes || []), { userId }],
+                }
               else {
-                const newLike = comment.likes.filter(
+                const newLike = (comment!.likes || []).filter(
                   (user) => user.userId !== userId
                 )
                 return { ...comment, likes: newLike }

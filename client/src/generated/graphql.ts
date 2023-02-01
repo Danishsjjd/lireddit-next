@@ -24,19 +24,25 @@ export type Scalars = {
   DateTime: any;
 };
 
+export type BooleanResponse = {
+  __typename?: 'BooleanResponse';
+  errors?: Maybe<Array<FieldErrors>>;
+  isHappen?: Maybe<Scalars['Boolean']>;
+};
+
 export type Comment = {
   __typename?: 'Comment';
-  children: Array<Comment>;
+  children?: Maybe<Array<Comment>>;
   createdAt: Scalars['DateTime'];
   id: Scalars['ID'];
-  likes: Array<Likes>;
+  likes?: Maybe<Array<Likes>>;
   message: Scalars['String'];
   parent?: Maybe<Comment>;
   parentId?: Maybe<Scalars['String']>;
-  post: Post;
+  post?: Maybe<Post>;
   postId: Scalars['String'];
   updatedAt: Scalars['DateTime'];
-  user: User;
+  user?: Maybe<User>;
   userId: Scalars['String'];
 };
 
@@ -45,28 +51,54 @@ export type CommentModify = {
   msg: Scalars['String'];
 };
 
+export type CommentResponse = {
+  __typename?: 'CommentResponse';
+  comments?: Maybe<Comment>;
+  errors?: Maybe<Array<FieldErrors>>;
+};
+
 export type CommentsInputs = {
   message: Scalars['String'];
   parentId?: InputMaybe<Scalars['String']>;
   postId: Scalars['String'];
-  userId: Scalars['String'];
+};
+
+export type FieldErrors = {
+  __typename?: 'FieldErrors';
+  field: Scalars['String'];
+  message: Scalars['String'];
 };
 
 export type Likes = {
   __typename?: 'Likes';
-  comment: Comment;
+  comment?: Maybe<Comment>;
   commentId: Scalars['String'];
-  id: Scalars['ID'];
-  user: User;
+  user?: Maybe<User>;
   userId: Scalars['String'];
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
-  createComment: Comment;
-  deleteComment: Scalars['Boolean'];
-  likeComment: Scalars['Boolean'];
-  updateComment: Scalars['Boolean'];
+  changeLikeOnComment: BooleanResponse;
+  changePoints: PointResponse;
+  createComment: CommentResponse;
+  createPost: PostResponse;
+  deleteComment: BooleanResponse;
+  login: UserResponse;
+  logout: Scalars['Boolean'];
+  signup: UserResponse;
+  updateComment: BooleanResponse;
+  updatePost: BooleanResponse;
+};
+
+
+export type MutationChangeLikeOnCommentArgs = {
+  commentId: Scalars['String'];
+};
+
+
+export type MutationChangePointsArgs = {
+  options: PointInput;
 };
 
 
@@ -75,13 +107,23 @@ export type MutationCreateCommentArgs = {
 };
 
 
+export type MutationCreatePostArgs = {
+  options: PostInput;
+};
+
+
 export type MutationDeleteCommentArgs = {
   commentId: Scalars['String'];
 };
 
 
-export type MutationLikeCommentArgs = {
-  commentId: Scalars['String'];
+export type MutationLoginArgs = {
+  options: UserInput;
+};
+
+
+export type MutationSignupArgs = {
+  options: UserInput;
 };
 
 
@@ -89,17 +131,59 @@ export type MutationUpdateCommentArgs = {
   options: CommentModify;
 };
 
+
+export type MutationUpdatePostArgs = {
+  options: UpdatePostInput;
+};
+
+export type PointInput = {
+  postId: Scalars['String'];
+  updatePointToThis: Scalars['Int'];
+  userId: Scalars['String'];
+};
+
+export type PointResponse = {
+  __typename?: 'PointResponse';
+  errors?: Maybe<Array<FieldErrors>>;
+  point?: Maybe<Scalars['Int']>;
+};
+
+export type Points = {
+  __typename?: 'Points';
+  point: Scalars['Int'];
+  post?: Maybe<Post>;
+  postId: Scalars['String'];
+  user?: Maybe<User>;
+  userId: Scalars['String'];
+};
+
 export type Post = {
   __typename?: 'Post';
   body: Scalars['String'];
-  comments: Array<Comment>;
+  comments?: Maybe<Array<Comment>>;
+  createdAt: Scalars['DateTime'];
   id: Scalars['ID'];
+  points?: Maybe<Array<Points>>;
   title: Scalars['String'];
+  updatedAt: Scalars['DateTime'];
+  user?: Maybe<User>;
+  userId: Scalars['String'];
+};
+
+export type PostInput = {
+  body: Scalars['String'];
+  title: Scalars['String'];
+};
+
+export type PostResponse = {
+  __typename?: 'PostResponse';
+  errors?: Maybe<Array<FieldErrors>>;
+  post?: Maybe<Post>;
 };
 
 export type Query = {
   __typename?: 'Query';
-  me: User;
+  me: UserResponse;
   post: Post;
   posts: Array<Post>;
 };
@@ -109,73 +193,157 @@ export type QueryPostArgs = {
   id: Scalars['String'];
 };
 
+export type UpdatePostInput = {
+  body: Scalars['String'];
+  postId: Scalars['String'];
+  title: Scalars['String'];
+};
+
 export type User = {
   __typename?: 'User';
-  comments: Array<Comment>;
+  comments?: Maybe<Array<Comment>>;
+  createdAt: Scalars['DateTime'];
+  email: Scalars['String'];
   id: Scalars['ID'];
-  likes: Array<Likes>;
+  likes?: Maybe<Array<Likes>>;
+  points?: Maybe<Array<Points>>;
+  post?: Maybe<Array<Post>>;
+  updatedAt: Scalars['DateTime'];
   username: Scalars['String'];
 };
 
-export type PostDataFragment = { __typename?: 'Post', title: string, id: string, body: string };
+export type UserInput = {
+  email?: InputMaybe<Scalars['String']>;
+  password: Scalars['String'];
+  username?: InputMaybe<Scalars['String']>;
+};
 
-export type DeleteCommentMutationVariables = Exact<{
-  commentId: Scalars['String'];
-}>;
+export type UserResponse = {
+  __typename?: 'UserResponse';
+  errors?: Maybe<Array<FieldErrors>>;
+  user?: Maybe<User>;
+};
 
+export type CommentDataFragment = { __typename?: 'Comment', id: string, createdAt: any, message: string, parentId?: string | null, likes?: Array<{ __typename?: 'Likes', userId: string }> | null, user?: { __typename?: 'User', id: string, username: string } | null };
 
-export type DeleteCommentMutation = { __typename?: 'Mutation', deleteComment: boolean };
+export type ErrorFragment = { __typename?: 'FieldErrors', message: string, field: string };
 
-export type ToggleLikeOnCommentMutationVariables = Exact<{
-  commentId: Scalars['String'];
-}>;
-
-
-export type ToggleLikeOnCommentMutation = { __typename?: 'Mutation', likeComment: boolean };
-
-export type UpdateCommentMutationVariables = Exact<{
-  options: CommentModify;
-}>;
-
-
-export type UpdateCommentMutation = { __typename?: 'Mutation', updateComment: boolean };
+export type PostDataFragment = { __typename?: 'Post', id: string, body: string, title: string, createdAt: any, user?: { __typename?: 'User', username: string, id: string } | null };
 
 export type CreateCommentMutationVariables = Exact<{
   options: CommentsInputs;
 }>;
 
 
-export type CreateCommentMutation = { __typename?: 'Mutation', createComment: { __typename?: 'Comment', id: string, createdAt: any, updatedAt: any, message: string, parentId?: string | null, user: { __typename?: 'User', id: string, username: string } } };
+export type CreateCommentMutation = { __typename?: 'Mutation', createComment: { __typename?: 'CommentResponse', errors?: Array<{ __typename?: 'FieldErrors', message: string, field: string }> | null, comments?: { __typename?: 'Comment', id: string, createdAt: any, message: string, parentId?: string | null, likes?: Array<{ __typename?: 'Likes', userId: string }> | null, user?: { __typename?: 'User', id: string, username: string } | null } | null } };
+
+export type DeleteCommentMutationVariables = Exact<{
+  commentId: Scalars['String'];
+}>;
+
+
+export type DeleteCommentMutation = { __typename?: 'Mutation', deleteComment: { __typename?: 'BooleanResponse', isHappen?: boolean | null, errors?: Array<{ __typename?: 'FieldErrors', message: string, field: string }> | null } };
+
+export type ToggleLikeOnCommentMutationVariables = Exact<{
+  commentId: Scalars['String'];
+}>;
+
+
+export type ToggleLikeOnCommentMutation = { __typename?: 'Mutation', changeLikeOnComment: { __typename?: 'BooleanResponse', isHappen?: boolean | null, errors?: Array<{ __typename?: 'FieldErrors', message: string, field: string }> | null } };
+
+export type UpdateCommentMutationVariables = Exact<{
+  options: CommentModify;
+}>;
+
+
+export type UpdateCommentMutation = { __typename?: 'Mutation', updateComment: { __typename?: 'BooleanResponse', isHappen?: boolean | null, errors?: Array<{ __typename?: 'FieldErrors', message: string, field: string }> | null } };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, username: string } };
+export type MeQuery = { __typename?: 'Query', me: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldErrors', message: string, field: string }> | null, user?: { __typename?: 'User', id: string, username: string, email: string } | null } };
 
 export type PostQueryVariables = Exact<{
   id: Scalars['String'];
 }>;
 
 
-export type PostQuery = { __typename?: 'Query', post: { __typename?: 'Post', title: string, id: string, body: string, comments: Array<{ __typename?: 'Comment', id: string, createdAt: any, message: string, parentId?: string | null, likes: Array<{ __typename?: 'Likes', userId: string }>, user: { __typename?: 'User', id: string, username: string } }> } };
+export type PostQuery = { __typename?: 'Query', post: { __typename?: 'Post', id: string, body: string, title: string, createdAt: any, comments?: Array<{ __typename?: 'Comment', id: string, createdAt: any, message: string, parentId?: string | null, likes?: Array<{ __typename?: 'Likes', userId: string }> | null, user?: { __typename?: 'User', id: string, username: string } | null }> | null, user?: { __typename?: 'User', username: string, id: string } | null } };
 
 export type PostsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', title: string, id: string, body: string }> };
+export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', id: string, body: string, title: string, createdAt: any, comments?: Array<{ __typename?: 'Comment', id: string }> | null, user?: { __typename?: 'User', username: string, id: string } | null }> };
 
+export const CommentDataFragmentDoc = `
+    fragment commentData on Comment {
+  id
+  createdAt
+  message
+  parentId
+  likes {
+    userId
+  }
+  user {
+    id
+    username
+  }
+}
+    `;
+export const ErrorFragmentDoc = `
+    fragment error on FieldErrors {
+  message
+  field
+}
+    `;
 export const PostDataFragmentDoc = `
     fragment postData on Post {
-  title
   id
   body
+  title
+  createdAt
+  user {
+    username
+    id
+  }
 }
     `;
+export const CreateCommentDocument = `
+    mutation createComment($options: CommentsInputs!) {
+  createComment(options: $options) {
+    errors {
+      ...error
+    }
+    comments {
+      ...commentData
+    }
+  }
+}
+    ${ErrorFragmentDoc}
+${CommentDataFragmentDoc}`;
+export const useCreateCommentMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(
+      client: GraphQLClient,
+      options?: UseMutationOptions<CreateCommentMutation, TError, CreateCommentMutationVariables, TContext>,
+      headers?: RequestInit['headers']
+    ) =>
+    useMutation<CreateCommentMutation, TError, CreateCommentMutationVariables, TContext>(
+      ['createComment'],
+      (variables?: CreateCommentMutationVariables) => fetcher<CreateCommentMutation, CreateCommentMutationVariables>(client, CreateCommentDocument, variables, headers)(),
+      options
+    );
 export const DeleteCommentDocument = `
     mutation deleteComment($commentId: String!) {
-  deleteComment(commentId: $commentId)
+  deleteComment(commentId: $commentId) {
+    errors {
+      ...error
+    }
+    isHappen
+  }
 }
-    `;
+    ${ErrorFragmentDoc}`;
 export const useDeleteCommentMutation = <
       TError = unknown,
       TContext = unknown
@@ -191,9 +359,14 @@ export const useDeleteCommentMutation = <
     );
 export const ToggleLikeOnCommentDocument = `
     mutation toggleLikeOnComment($commentId: String!) {
-  likeComment(commentId: $commentId)
+  changeLikeOnComment(commentId: $commentId) {
+    errors {
+      ...error
+    }
+    isHappen
+  }
 }
-    `;
+    ${ErrorFragmentDoc}`;
 export const useToggleLikeOnCommentMutation = <
       TError = unknown,
       TContext = unknown
@@ -209,9 +382,14 @@ export const useToggleLikeOnCommentMutation = <
     );
 export const UpdateCommentDocument = `
     mutation updateComment($options: CommentModify!) {
-  updateComment(options: $options)
+  updateComment(options: $options) {
+    errors {
+      ...error
+    }
+    isHappen
+  }
 }
-    `;
+    ${ErrorFragmentDoc}`;
 export const useUpdateCommentMutation = <
       TError = unknown,
       TContext = unknown
@@ -225,42 +403,20 @@ export const useUpdateCommentMutation = <
       (variables?: UpdateCommentMutationVariables) => fetcher<UpdateCommentMutation, UpdateCommentMutationVariables>(client, UpdateCommentDocument, variables, headers)(),
       options
     );
-export const CreateCommentDocument = `
-    mutation createComment($options: CommentsInputs!) {
-  createComment(options: $options) {
-    id
-    createdAt
-    updatedAt
-    message
-    parentId
-    user {
-      id
-      username
-    }
-  }
-}
-    `;
-export const useCreateCommentMutation = <
-      TError = unknown,
-      TContext = unknown
-    >(
-      client: GraphQLClient,
-      options?: UseMutationOptions<CreateCommentMutation, TError, CreateCommentMutationVariables, TContext>,
-      headers?: RequestInit['headers']
-    ) =>
-    useMutation<CreateCommentMutation, TError, CreateCommentMutationVariables, TContext>(
-      ['createComment'],
-      (variables?: CreateCommentMutationVariables) => fetcher<CreateCommentMutation, CreateCommentMutationVariables>(client, CreateCommentDocument, variables, headers)(),
-      options
-    );
 export const MeDocument = `
     query me {
   me {
-    id
-    username
+    errors {
+      ...error
+    }
+    user {
+      id
+      username
+      email
+    }
   }
 }
-    `;
+    ${ErrorFragmentDoc}`;
 export const useMeQuery = <
       TData = MeQuery,
       TError = unknown
@@ -279,22 +435,13 @@ export const PostDocument = `
     query post($id: String!) {
   post(id: $id) {
     comments {
-      id
-      createdAt
-      message
-      parentId
-      likes {
-        userId
-      }
-      user {
-        id
-        username
-      }
+      ...commentData
     }
     ...postData
   }
 }
-    ${PostDataFragmentDoc}`;
+    ${CommentDataFragmentDoc}
+${PostDataFragmentDoc}`;
 export const usePostQuery = <
       TData = PostQuery,
       TError = unknown
@@ -313,6 +460,9 @@ export const PostsDocument = `
     query posts {
   posts {
     ...postData
+    comments {
+      id
+    }
   }
 }
     ${PostDataFragmentDoc}`;
