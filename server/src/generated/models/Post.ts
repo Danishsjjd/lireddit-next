@@ -26,5 +26,11 @@ export class Post {
   @Field((_type) => [Points], { nullable: true })
   points?: Points[]
 
+  @Field()
+  createdAt: Date
+
+  @Field()
+  updatedAt: Date
+
   // skip overwrite 👇
 }

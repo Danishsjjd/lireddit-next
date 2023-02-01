@@ -1,5 +1,8 @@
 query posts {
   posts {
     ...postData
+    comments {
+      id
+    }
   }
 }

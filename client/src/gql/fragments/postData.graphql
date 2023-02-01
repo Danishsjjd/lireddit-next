@@ -1,5 +1,10 @@
 fragment postData on Post {
-  title
   id
   body
+  title
+  createdAt
+  user {
+    username
+    id
+  }
 }

@@ -1,0 +1,14 @@
+fragment commentData on Comment {
+  id
+  createdAt
+  message
+  parentId
+  likes {
+    userId
+  }
+  user {
+    id
+    username
+    email
+  }
+}

@@ -1,3 +1,8 @@
 mutation deleteComment($commentId: String!) {
-  deleteComment(commentId: $commentId)
+  deleteComment(commentId: $commentId) {
+    errors {
+      ...error
+    }
+    isHappen
+  }
 }

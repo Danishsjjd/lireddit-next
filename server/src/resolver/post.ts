@@ -6,6 +6,8 @@ import {
   Info,
   Mutation,
   UseMiddleware,
+  FieldResolver,
+  Root,
 } from "type-graphql"
 import { Post } from "../generated/models/Post"
 import { MyContext } from "../type"
@@ -20,8 +22,26 @@ import { PointInput, PostInput, UpdatePostInput } from "../types/post"
 import { isAuthenticated } from "../middleware/isAuthenticated"
 import { sendError } from "../utils/sendError"
 
-@Resolver()
+@Resolver(Post)
 class PostResolver {
+  @FieldResolver(() => String)
+  user(@Root() post: Post, @Ctx() { req }: MyContext) {
+    if (req.session.userId === post.user?.id) {
+      return post.user
+    }
+    // current user wants to see someone elses email
+    return { ...post.user, email: "" }
+  }
+
+  @FieldResolver(() => String)
+  comments(@Root() post: Post, @Ctx() { req }: MyContext) {
+    return post.comments?.map((comment) =>
+      (req.session.userId || "") === comment?.userId
+        ? comment
+        : { ...comment, user: { ...comment.user, email: "" } }
+    )
+  }
+
   @Query(() => [Post])
   async posts(@Ctx() { prisma }: MyContext, @Info() info: GraphQLResolveInfo) {
     const [postSelect, commentsSelect] = extractKey(info, "comments")

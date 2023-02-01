@@ -27,5 +27,11 @@ export class User {
   @Field((_type) => [Points], { nullable: true })
   points?: Points[]
 
+  @Field()
+  createdAt: Date
+
+  @Field()
+  updatedAt: Date
+
   // skip overwrite 👇
 }
