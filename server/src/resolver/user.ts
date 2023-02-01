@@ -11,7 +11,7 @@ import { COOKIE_NAME } from "../constant"
 import { isAuthenticated } from "../middleware/isAuthenticated"
 import { MyContext } from "../type"
 import { UserResponse } from "../types/gqResponse"
-import { UserInput } from "../types/user"
+import { UserInput, UserLoginInput } from "../types/user"
 import { sendError } from "../utils/sendError"
 
 @ObjectType()
@@ -29,15 +29,18 @@ class userResolver {
   @Mutation(() => UserResponse)
   async login(
     @Ctx() { prisma, req }: MyContext,
-    @Arg("options") options: UserInput
+    @Arg("options") options: UserLoginInput
   ): Promise<UserResponse> {
-    const { password, username, email } = options
+    const { password, usernameOrEmail } = options
 
-    if (!username && !email)
-      return sendError("username_email", "please provide username or email")
+    let obj: { username?: string; email?: string } = {
+      username: usernameOrEmail as string,
+    }
+    if (usernameOrEmail.includes("@"))
+      obj = { email: usernameOrEmail as string }
 
     const user = await prisma.user.findUnique({
-      where: { email: email as string, username: username as string },
+      where: obj,
     })
     if (!user) return sendError("user", "user is exists")
 

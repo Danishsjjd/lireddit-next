@@ -10,6 +10,7 @@
     "gen": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
+    "@hookform/error-message": "^2.0.1",
     "@next/font": "13.1.4",
     "@tanstack/react-query": "^4.22.4",
     "@tanstack/react-query-devtools": "^4.22.4",
@@ -22,6 +23,7 @@
     "next": "13.1.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-hook-form": "^7.43.0",
     "react-icons": "^4.7.1",
     "typescript": "4.9.4"
   },

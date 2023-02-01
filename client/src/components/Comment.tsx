@@ -60,7 +60,7 @@ const Comment = ({ comment }: Props) => {
 
   // ? node.js provide different character in space while browser
   // ? provide different so first browser paint not match that's
-  // ? why I'm removing space in server and adding back in client browser
+  // ? why I'm removing space in server and adding back in client (browser)
   useEffect(() => {
     setClientCreatedAt(dateFormatter.format(Date.parse(createdAt)))
   }, [])

@@ -84,6 +84,7 @@ export type Mutation = {
   createComment: CommentResponse;
   createPost: PostResponse;
   deleteComment: BooleanResponse;
+  deletePost: BooleanResponse;
   login: UserResponse;
   logout: Scalars['Boolean'];
   signup: UserResponse;
@@ -117,8 +118,13 @@ export type MutationDeleteCommentArgs = {
 };
 
 
+export type MutationDeletePostArgs = {
+  postId: Scalars['String'];
+};
+
+
 export type MutationLoginArgs = {
-  options: UserInput;
+  options: UserLoginInput;
 };
 
 
@@ -213,9 +219,14 @@ export type User = {
 };
 
 export type UserInput = {
-  email?: InputMaybe<Scalars['String']>;
+  email: Scalars['String'];
   password: Scalars['String'];
-  username?: InputMaybe<Scalars['String']>;
+  username: Scalars['String'];
+};
+
+export type UserLoginInput = {
+  password: Scalars['String'];
+  usernameOrEmail: Scalars['String'];
 };
 
 export type UserResponse = {
@@ -230,6 +241,8 @@ export type ErrorFragment = { __typename?: 'FieldErrors', message: string, field
 
 export type PostDataFragment = { __typename?: 'Post', id: string, body: string, title: string, createdAt: any, user?: { __typename?: 'User', username: string, id: string } | null };
 
+export type UserDataFragment = { __typename?: 'User', id: string, username: string, email: string };
+
 export type CreateCommentMutationVariables = Exact<{
   options: CommentsInputs;
 }>;
@@ -243,6 +256,25 @@ export type DeleteCommentMutationVariables = Exact<{
 
 
 export type DeleteCommentMutation = { __typename?: 'Mutation', deleteComment: { __typename?: 'BooleanResponse', isHappen?: boolean | null, errors?: Array<{ __typename?: 'FieldErrors', message: string, field: string }> | null } };
+
+export type LoginMutationVariables = Exact<{
+  options: UserLoginInput;
+}>;
+
+
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldErrors', message: string, field: string }> | null, user?: { __typename?: 'User', id: string, username: string, email: string } | null } };
+
+export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
+
+export type SignupMutationVariables = Exact<{
+  options: UserInput;
+}>;
+
+
+export type SignupMutation = { __typename?: 'Mutation', signup: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldErrors', message: string, field: string }> | null, user?: { __typename?: 'User', id: string, username: string, email: string } | null } };
 
 export type ToggleLikeOnCommentMutationVariables = Exact<{
   commentId: Scalars['String'];
@@ -308,6 +340,13 @@ export const PostDataFragmentDoc = `
   }
 }
     `;
+export const UserDataFragmentDoc = `
+    fragment userData on User {
+  id
+  username
+  email
+}
+    `;
 export const CreateCommentDocument = `
     mutation createComment($options: CommentsInputs!) {
   createComment(options: $options) {
@@ -355,6 +394,76 @@ export const useDeleteCommentMutation = <
     useMutation<DeleteCommentMutation, TError, DeleteCommentMutationVariables, TContext>(
       ['deleteComment'],
       (variables?: DeleteCommentMutationVariables) => fetcher<DeleteCommentMutation, DeleteCommentMutationVariables>(client, DeleteCommentDocument, variables, headers)(),
+      options
+    );
+export const LoginDocument = `
+    mutation login($options: UserLoginInput!) {
+  login(options: $options) {
+    errors {
+      ...error
+    }
+    user {
+      ...userData
+    }
+  }
+}
+    ${ErrorFragmentDoc}
+${UserDataFragmentDoc}`;
+export const useLoginMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(
+      client: GraphQLClient,
+      options?: UseMutationOptions<LoginMutation, TError, LoginMutationVariables, TContext>,
+      headers?: RequestInit['headers']
+    ) =>
+    useMutation<LoginMutation, TError, LoginMutationVariables, TContext>(
+      ['login'],
+      (variables?: LoginMutationVariables) => fetcher<LoginMutation, LoginMutationVariables>(client, LoginDocument, variables, headers)(),
+      options
+    );
+export const LogoutDocument = `
+    mutation logout {
+  logout
+}
+    `;
+export const useLogoutMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(
+      client: GraphQLClient,
+      options?: UseMutationOptions<LogoutMutation, TError, LogoutMutationVariables, TContext>,
+      headers?: RequestInit['headers']
+    ) =>
+    useMutation<LogoutMutation, TError, LogoutMutationVariables, TContext>(
+      ['logout'],
+      (variables?: LogoutMutationVariables) => fetcher<LogoutMutation, LogoutMutationVariables>(client, LogoutDocument, variables, headers)(),
+      options
+    );
+export const SignupDocument = `
+    mutation signup($options: UserInput!) {
+  signup(options: $options) {
+    errors {
+      ...error
+    }
+    user {
+      ...userData
+    }
+  }
+}
+    ${ErrorFragmentDoc}
+${UserDataFragmentDoc}`;
+export const useSignupMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(
+      client: GraphQLClient,
+      options?: UseMutationOptions<SignupMutation, TError, SignupMutationVariables, TContext>,
+      headers?: RequestInit['headers']
+    ) =>
+    useMutation<SignupMutation, TError, SignupMutationVariables, TContext>(
+      ['signup'],
+      (variables?: SignupMutationVariables) => fetcher<SignupMutation, SignupMutationVariables>(client, SignupDocument, variables, headers)(),
       options
     );
 export const ToggleLikeOnCommentDocument = `
@@ -410,13 +519,12 @@ export const MeDocument = `
       ...error
     }
     user {
-      id
-      username
-      email
+      ...userData
     }
   }
 }
-    ${ErrorFragmentDoc}`;
+    ${ErrorFragmentDoc}
+${UserDataFragmentDoc}`;
 export const useMeQuery = <
       TData = MeQuery,
       TError = unknown
