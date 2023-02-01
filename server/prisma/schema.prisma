@@ -19,6 +19,7 @@ datasource db {
 model User {
   id       String    @id @default(uuid())
   username String    @unique
+  email    String    @unique
   // @nullable
   comments Comment[]
   // @nullable
@@ -77,6 +78,7 @@ model Likes {
 }
 
 model Points {
+  point  Int    @default(0)
   // @nullable
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String

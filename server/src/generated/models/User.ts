@@ -12,6 +12,9 @@ export class User {
   @Field()
   username: string
 
+  @Field()
+  email: string
+
   @Field((_type) => [Comment], { nullable: true })
   comments?: Comment[]
 

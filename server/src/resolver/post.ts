@@ -1,8 +1,24 @@
-import { Ctx, Query, Resolver, Arg, Info } from "type-graphql"
+import {
+  Ctx,
+  Query,
+  Resolver,
+  Arg,
+  Info,
+  Mutation,
+  UseMiddleware,
+} from "type-graphql"
 import { Post } from "../generated/models/Post"
 import { MyContext } from "../type"
 import { GraphQLResolveInfo } from "graphql"
 import { extractKey } from "../utils/extractKey"
+import {
+  BooleanResponse,
+  PointResponse,
+  PostResponse,
+} from "../types/gqResponse"
+import { PointInput, PostInput, UpdatePostInput } from "../types/post"
+import { isAuthenticated } from "../middleware/isAuthenticated"
+import { sendError } from "../utils/sendError"
 
 @Resolver()
 class PostResolver {
@@ -61,6 +77,91 @@ class PostResolver {
     if (res === null) throw new Error("post id is not correct")
 
     return res
+  }
+
+  @Mutation(() => PostResponse)
+  @UseMiddleware(isAuthenticated)
+  async createPost(
+    @Arg("options") options: PostInput,
+    @Ctx() { prisma, req }: MyContext
+  ): Promise<PostResponse> {
+    const { body, title } = options
+
+    const post = await prisma.post.create({
+      data: { body, title, userId: req.session.userId as string },
+    })
+
+    return { post }
+  }
+
+  @Mutation(() => BooleanResponse)
+  @UseMiddleware(isAuthenticated)
+  async updatePost(
+    @Arg("options") options: UpdatePostInput,
+    @Ctx() { prisma, req }: MyContext
+  ): Promise<BooleanResponse> {
+    const { body, postId, title } = options
+
+    const post = await prisma.post.findUnique({
+      where: {
+        id: postId,
+      },
+      select: { id: true, userId: true },
+    })
+
+    if (!post) return sendError("post", "post is not exists")
+
+    if (post.userId !== req.session.userId)
+      return sendError("user", "cannot change others post")
+
+    await prisma.post.update({ where: { id: post.id }, data: { body, title } })
+
+    return { isHappen: true }
+  }
+
+  @Mutation(() => PointResponse)
+  @UseMiddleware(isAuthenticated)
+  async changePoints(
+    @Ctx() { prisma, req }: MyContext,
+    @Arg("options") options: PointInput
+  ): Promise<PointResponse> {
+    const { postId, updatePointToThis: currentPoint } = options
+
+    const updatePointToThis =
+      currentPoint >= 1 ? 1 : currentPoint <= -1 ? -1 : 0
+
+    const point = await prisma.points.findUnique({
+      where: {
+        userId_postId: { userId: req.session.userId as string, postId },
+      },
+      select: { point: true, userId: true },
+    })
+
+    if (!point) {
+      const newPoint = await prisma.points.create({
+        data: {
+          userId: req.session.userId as string,
+          postId,
+          point: updatePointToThis,
+        },
+      })
+
+      return { point: newPoint.point }
+    }
+
+    const newPoint = await prisma.points.update({
+      where: {
+        userId_postId: {
+          postId,
+          userId: req.session.userId as string,
+        },
+      },
+      data: {
+        point: updatePointToThis,
+      },
+    })
+
+    return { point: newPoint.point }
   }
 }
 export default PostResolver

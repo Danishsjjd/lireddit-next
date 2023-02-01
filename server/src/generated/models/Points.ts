@@ -1,9 +1,12 @@
-import { Field, ObjectType } from "type-graphql"
-import { User } from "./User"
+import { Field, Int, ObjectType } from "type-graphql"
 import { Post } from "./Post"
+import { User } from "./User"
 
 @ObjectType()
 export class Points {
+  @Field((_type) => Int)
+  point: number
+
   @Field((_type) => User, { nullable: true })
   user?: User
 

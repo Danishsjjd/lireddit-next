@@ -12,6 +12,7 @@ import { isAuthenticated } from "../middleware/isAuthenticated"
 import { MyContext } from "../type"
 import { UserResponse } from "../types/gqResponse"
 import { UserInput } from "../types/user"
+import { sendError } from "../utils/sendError"
 
 @ObjectType()
 class userResolver {
@@ -21,7 +22,7 @@ class userResolver {
     const user = await prisma.user.findUnique({
       where: { id: req.session.userId as string },
     })
-    if (!user) return { errors: [{ field: "server", message: "server error" }] }
+    if (!user) return sendError("server", "server error")
     return { user: user }
   }
 
@@ -30,21 +31,18 @@ class userResolver {
     @Ctx() { prisma, req }: MyContext,
     @Arg("options") options: UserInput
   ): Promise<UserResponse> {
-    const { password, username } = options
+    const { password, username, email } = options
+
+    if (!username && !email)
+      return sendError("username_email", "please provide username or email")
 
     const user = await prisma.user.findUnique({
-      where: { username: username as string },
+      where: { email: email as string, username: username as string },
     })
-    if (!user)
-      return {
-        errors: [{ field: "username", message: "username is incorrect" }],
-      }
+    if (!user) return sendError("user", "user is exists")
 
     const isPasswordMatch = await verify(user.password, password as string)
-    if (!isPasswordMatch)
-      return {
-        errors: [{ field: "password", message: "password is incorrect" }],
-      }
+    if (!isPasswordMatch) return sendError("password", "password is incorrect")
 
     req.session.userId = user.id
 
@@ -56,7 +54,7 @@ class userResolver {
     @Ctx() { prisma, req }: MyContext,
     @Arg("options") options: UserInput
   ): Promise<UserResponse> {
-    const { password, username } = options
+    const { password, username, email } = options
 
     const hashedPassword = await hash(password as string)
 
@@ -64,6 +62,7 @@ class userResolver {
       data: {
         password: hashedPassword,
         username: username as string,
+        email: email as string,
       },
     })
 
