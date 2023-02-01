@@ -21,19 +21,22 @@ import {
 import { PointInput, PostInput, UpdatePostInput } from "../types/post"
 import { isAuthenticated } from "../middleware/isAuthenticated"
 import { sendError } from "../utils/sendError"
+import { User } from "../generated/models/User"
 
 @Resolver(Post)
 class PostResolver {
-  @FieldResolver(() => String)
-  user(@Root() post: Post, @Ctx() { req }: MyContext) {
-    if (req.session.userId === post.user?.id) {
-      return post.user
+  @FieldResolver(() => User, { nullable: true })
+  user(@Root() post: Post, @Ctx() { req }: MyContext): User | null {
+    if (post.user) {
+      if (req.session.userId === post.user?.id) {
+        return post.user
+      }
+      // current user wants to see someone elses email
+      return { ...post.user, email: "" }
     }
-    // current user wants to see someone elses email
-    return { ...post.user, email: "" }
+    return null
   }
-
-  @FieldResolver(() => String)
+  @FieldResolver({ nullable: true })
   comments(@Root() post: Post, @Ctx() { req }: MyContext) {
     return post.comments?.map((comment) =>
       (req.session.userId || "") === comment?.userId
@@ -46,25 +49,21 @@ class PostResolver {
   async posts(@Ctx() { prisma }: MyContext, @Info() info: GraphQLResolveInfo) {
     const [postSelect, commentsSelect] = extractKey(info, "comments")
 
-    if (commentsSelect) {
-      const postWithComments = await prisma.post.findMany({
-        select: {
-          ...postSelect,
-          comments: !commentsSelect
-            ? false
-            : {
-                orderBy: {
-                  createdAt: "desc",
-                },
-                select: {
-                  ...commentsSelect.select,
-                },
+    return prisma.post.findMany({
+      select: {
+        ...postSelect,
+        comments: !commentsSelect
+          ? false
+          : {
+              orderBy: {
+                createdAt: "desc",
               },
-        },
-      })
-      return postWithComments
-    }
-    return prisma.post.findMany()
+              select: {
+                ...commentsSelect.select,
+              },
+            },
+      },
+    })
   }
 
   @Query(() => Post)

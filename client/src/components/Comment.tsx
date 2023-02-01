@@ -16,7 +16,7 @@ import CommentList from "./CommentList"
 import { IconBtn } from "./IconBtn"
 
 type Props = {
-  comment: Exclude<Exclude<CommentType, null>, undefined>[number]
+  comment: Exclude<CommentType, null | undefined>[number]
 }
 
 const dateFormatter = Intl.DateTimeFormat("eng", {
