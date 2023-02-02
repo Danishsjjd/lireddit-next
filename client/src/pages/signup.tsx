@@ -1,5 +1,5 @@
 import Input from "@/components/Input"
-import { MeQuery, useLoginMutation } from "@/generated/graphql"
+import { MeQuery, useSignupMutation } from "@/generated/graphql"
 import usePublicRoute from "@/hooks/usePublicRoute"
 import graphqlRequest from "@/libs/graphqlRequest"
 import errorsKeys from "@/utils/showError"
@@ -8,37 +8,39 @@ import { useRouter } from "next/router"
 import { useForm } from "react-hook-form"
 import { RotatingLines } from "react-loader-spinner"
 
-type LoginFormData = {
-  usernameOrEmail: string
+type FormData = {
+  username: string
+  email: string
   password: string
 }
 
-const Login = () => {
+const Signup = () => {
   const router = useRouter()
   const { isLoading } = usePublicRoute(router)
   const queryClient = useQueryClient()
   const { next } = router.query
-  const { mutate: LoginFunc } = useLoginMutation(graphqlRequest)
+  const { mutate: LoginFunc } = useSignupMutation(graphqlRequest)
   const {
     formState: { errors, isSubmitting },
     register,
     handleSubmit,
     setError,
-  } = useForm<LoginFormData>({})
+  } = useForm<FormData>({})
 
-  const onSubmit = (data: LoginFormData) => {
-    const { password, usernameOrEmail } = data
+  const onSubmit = (data: FormData) => {
+    const { password, email, username } = data
 
     LoginFunc(
-      { options: { password, usernameOrEmail } },
+      { options: { password, email, username } },
       {
         onSuccess(data) {
-          if (data.login.errors) return errorsKeys(setError, data.login.errors)
+          if (data.signup.errors)
+            return errorsKeys(setError, data.signup.errors)
 
-          if (data.login.user) {
+          if (data.signup.user) {
             queryClient.setQueryData<MeQuery>(["me"], (queryData) => {
-              if (data.login.user)
-                return { me: { user: { ...data.login.user } } }
+              if (data.signup.user)
+                return { me: { user: { ...data.signup.user } } }
 
               return queryData
             })
@@ -66,25 +68,12 @@ const Login = () => {
             <h3 className="text-4xl">Login</h3>
           </div>
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
-            {/* <Input<FormData>
-            errors={errors}
-            register={register}
-            name="email"
-            title="Enter Email"
-            type={"email"}
-          /> */}
-            <Input<LoginFormData>
+            <Input<FormData>
               errors={errors}
               register={register}
-              name="usernameOrEmail"
-              title="Enter Username Or Email"
-              type={"text"}
-              // validations={{
-              //   pattern: {
-              //     value: /^[^@]+$/,
-              //     message: "username must not contains @ sign",
-              //   },
-              // }}
+              name="email"
+              title="Enter Email"
+              type={"email"}
               validations={{
                 required: {
                   message: "required",
@@ -92,7 +81,24 @@ const Login = () => {
                 },
               }}
             />
-            <Input<LoginFormData>
+            <Input<FormData>
+              errors={errors}
+              register={register}
+              name="username"
+              title="Enter Username"
+              type={"text"}
+              validations={{
+                pattern: {
+                  value: /^[^@]+$/,
+                  message: "username must not contains @ sign",
+                },
+                required: {
+                  value: true,
+                  message: "required",
+                },
+              }}
+            />
+            <Input<FormData>
               errors={errors}
               register={register}
               name="password"
@@ -118,4 +124,4 @@ const Login = () => {
   )
 }
 
-export default Login
+export default Signup

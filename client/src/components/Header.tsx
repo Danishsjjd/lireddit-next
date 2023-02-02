@@ -8,8 +8,8 @@ const Header = () => {
           <Link href={"/login"} className="btn-outline btn rounded-full">
             login
           </Link>
-          <Link href={"/signIn"} className="btn-primary btn rounded-full">
-            sign in
+          <Link href={"/signup"} className="btn-primary btn rounded-full">
+            sign up
           </Link>
         </nav>
       </div>

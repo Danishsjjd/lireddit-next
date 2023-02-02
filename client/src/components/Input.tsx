@@ -34,7 +34,7 @@ const Input = <T extends {}>({
         type={type}
         className={`${
           className ? className : ""
-        } input-bordered input w-full min-w-[23rem]`}
+        } input-bordered input w-full min-w-[18rem] sm:min-w-[23rem]`}
         {...register(name, validations)}
         {...props}
       />

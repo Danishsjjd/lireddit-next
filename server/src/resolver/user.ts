@@ -42,7 +42,7 @@ class userResolver {
     const user = await prisma.user.findUnique({
       where: obj,
     })
-    if (!user) return sendError("user", "user is exists")
+    if (!user) return sendError("usernameOrEmail", "user is not exists")
 
     const isPasswordMatch = await verify(user.password, password as string)
     if (!isPasswordMatch) return sendError("password", "password is incorrect")

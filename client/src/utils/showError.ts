@@ -1,5 +1,10 @@
-import { ClientError } from "graphql-request"
+import { UseFormSetError } from "react-hook-form"
 
-export default function showError(err: ClientError): string {
-  return err?.response?.errors?.[0]?.message as string
+export default function errorsKeys<T extends {}>(
+  setError: UseFormSetError<T>,
+  err: { field: any; message: string }[]
+) {
+  err.map(({ field, message }) => {
+    setError(field, { message })
+  })
 }
