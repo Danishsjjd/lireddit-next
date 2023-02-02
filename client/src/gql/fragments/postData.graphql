@@ -3,6 +3,10 @@ fragment postData on Post {
   body
   title
   createdAt
+  points {
+    point
+    userId
+  }
   user {
     username
     id

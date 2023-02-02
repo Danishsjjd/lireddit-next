@@ -6,6 +6,7 @@ import {
   useUpdateCommentMutation,
 } from "@/generated/graphql"
 import graphqlRequest from "@/libs/graphqlRequest"
+import dateFormatter from "@/utils/dateFormatter"
 import showError from "@/utils/showError"
 import { ClientError } from "graphql-request"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
@@ -18,11 +19,6 @@ import { IconBtn } from "./IconBtn"
 type Props = {
   comment: Exclude<CommentType, null | undefined>[number]
 }
-
-const dateFormatter = Intl.DateTimeFormat("eng", {
-  dateStyle: "medium",
-  timeStyle: "short",
-})
 
 const Comment = ({ comment }: Props) => {
   const { createdAt, id, message, user } = comment
@@ -91,11 +87,10 @@ const Comment = ({ comment }: Props) => {
     deleteCurrentComment(
       { commentId: id },
       {
-        onSuccess() {
+        onSuccess(data) {
+          if (data.deleteComment.errors)
+            return showError(setError, data.deleteComment.errors)
           onPostCommentDelete?.(id)
-        },
-        onError(error) {
-          setError(showError(error as ClientError))
         },
       }
     )
@@ -105,10 +100,10 @@ const Comment = ({ comment }: Props) => {
     updateCommentFunc(
       { options: { commentId: id, msg: msg } },
       {
-        onError: (err) => {
-          setError(showError(err as ClientError))
-        },
-        onSuccess: () => {
+        onSuccess: (data) => {
+          if (data.updateComment.errors)
+            return showError(setError, data.updateComment.errors)
+
           onPostCommentUpdate?.(id, msg)
           setIsUpdating(false)
         },
@@ -140,8 +135,8 @@ const Comment = ({ comment }: Props) => {
 
   return (
     <>
-      <div className="rounded-lg border p-2">
-        <header className="mb-2 flex justify-between text-purple-500">
+      <div className="rounded-lg border bg-zinc-900 p-2">
+        <header className="mb-2 flex justify-between text-white">
           <span className=" font-bold">{user?.username}</span>
           <span className="date">{clientCreatedAt}</span>
         </header>

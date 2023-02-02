@@ -1,0 +1,8 @@
+mutation changePoints($options: PointInput!) {
+  changePoints(options: $options) {
+    errors {
+      ...error
+    }
+    point
+  }
+}

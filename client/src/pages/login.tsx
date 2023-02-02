@@ -16,6 +16,7 @@ type LoginFormData = {
 const Login = () => {
   const router = useRouter()
   const { isLoading } = usePublicRoute(router)
+
   const queryClient = useQueryClient()
   const { next } = router.query
   const { mutate: LoginFunc } = useLoginMutation(graphqlRequest)
@@ -42,7 +43,6 @@ const Login = () => {
 
               return queryData
             })
-            router.replace((next as string) || "/")
           }
         },
       }

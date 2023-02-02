@@ -8,7 +8,7 @@ const usePublicRoute = (router: NextRouter) => {
 
   useEffect(() => {
     if (!isLoading && data?.me.user) {
-      router.replace("/")
+      router.replace((router.query.next as string) || "/")
     }
   }, [isLoading, data, router])
 

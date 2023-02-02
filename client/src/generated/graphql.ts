@@ -239,9 +239,16 @@ export type CommentDataFragment = { __typename?: 'Comment', id: string, createdA
 
 export type ErrorFragment = { __typename?: 'FieldErrors', message: string, field: string };
 
-export type PostDataFragment = { __typename?: 'Post', id: string, body: string, title: string, createdAt: any, user?: { __typename?: 'User', username: string, id: string } | null };
+export type PostDataFragment = { __typename?: 'Post', id: string, body: string, title: string, createdAt: any, points?: Array<{ __typename?: 'Points', point: number, userId: string }> | null, user?: { __typename?: 'User', username: string, id: string } | null };
 
 export type UserDataFragment = { __typename?: 'User', id: string, username: string, email: string };
+
+export type ChangePointsMutationVariables = Exact<{
+  options: PointInput;
+}>;
+
+
+export type ChangePointsMutation = { __typename?: 'Mutation', changePoints: { __typename?: 'PointResponse', point?: number | null, errors?: Array<{ __typename?: 'FieldErrors', message: string, field: string }> | null } };
 
 export type CreateCommentMutationVariables = Exact<{
   options: CommentsInputs;
@@ -300,12 +307,12 @@ export type PostQueryVariables = Exact<{
 }>;
 
 
-export type PostQuery = { __typename?: 'Query', post: { __typename?: 'Post', id: string, body: string, title: string, createdAt: any, comments?: Array<{ __typename?: 'Comment', id: string, createdAt: any, message: string, parentId?: string | null, likes?: Array<{ __typename?: 'Likes', userId: string }> | null, user?: { __typename?: 'User', id: string, username: string } | null }> | null, user?: { __typename?: 'User', username: string, id: string } | null } };
+export type PostQuery = { __typename?: 'Query', post: { __typename?: 'Post', id: string, body: string, title: string, createdAt: any, comments?: Array<{ __typename?: 'Comment', id: string, createdAt: any, message: string, parentId?: string | null, likes?: Array<{ __typename?: 'Likes', userId: string }> | null, user?: { __typename?: 'User', id: string, username: string } | null }> | null, points?: Array<{ __typename?: 'Points', point: number, userId: string }> | null, user?: { __typename?: 'User', username: string, id: string } | null } };
 
 export type PostsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', id: string, body: string, title: string, createdAt: any, comments?: Array<{ __typename?: 'Comment', id: string }> | null, user?: { __typename?: 'User', username: string, id: string } | null }> };
+export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', id: string, body: string, title: string, createdAt: any, comments?: Array<{ __typename?: 'Comment', id: string }> | null, points?: Array<{ __typename?: 'Points', point: number, userId: string }> | null, user?: { __typename?: 'User', username: string, id: string } | null }> };
 
 export const CommentDataFragmentDoc = `
     fragment commentData on Comment {
@@ -334,6 +341,10 @@ export const PostDataFragmentDoc = `
   body
   title
   createdAt
+  points {
+    point
+    userId
+  }
   user {
     username
     id
@@ -347,6 +358,29 @@ export const UserDataFragmentDoc = `
   email
 }
     `;
+export const ChangePointsDocument = `
+    mutation changePoints($options: PointInput!) {
+  changePoints(options: $options) {
+    errors {
+      ...error
+    }
+    point
+  }
+}
+    ${ErrorFragmentDoc}`;
+export const useChangePointsMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(
+      client: GraphQLClient,
+      options?: UseMutationOptions<ChangePointsMutation, TError, ChangePointsMutationVariables, TContext>,
+      headers?: RequestInit['headers']
+    ) =>
+    useMutation<ChangePointsMutation, TError, ChangePointsMutationVariables, TContext>(
+      ['changePoints'],
+      (variables?: ChangePointsMutationVariables) => fetcher<ChangePointsMutation, ChangePointsMutationVariables>(client, ChangePointsDocument, variables, headers)(),
+      options
+    );
 export const CreateCommentDocument = `
     mutation createComment($options: CommentsInputs!) {
   createComment(options: $options) {
