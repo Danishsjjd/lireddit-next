@@ -23,7 +23,7 @@ import { isAuthenticated } from "../middleware/isAuthenticated"
 import { sendError } from "../utils/sendError"
 import { User } from "../generated/models/User"
 
-@Resolver(Post)
+@Resolver(Post /* required for @FieldResolver */)
 class PostResolver {
   @FieldResolver(() => User, { nullable: true })
   user(@Root() post: Post, @Ctx() { req }: MyContext): User | null {

@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE `points` ADD COLUMN `point` INTEGER NOT NULL DEFAULT 0;

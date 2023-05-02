@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  pg:
+    image: mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql
+      MYSQL_DATABASE: lireddit
+    volumes:
+      - lireddit:/var/lib/postgresql/data
+
+volumes:
+  lireddit:

@@ -3,8 +3,8 @@ import {
   Arg,
   Ctx,
   Mutation,
-  ObjectType,
   Query,
+  Resolver,
   UseMiddleware,
 } from "type-graphql"
 import { COOKIE_NAME } from "../constant"
@@ -14,7 +14,7 @@ import { UserResponse } from "../types/gqResponse"
 import { UserInput, UserLoginInput } from "../types/user"
 import { sendError } from "../utils/sendError"
 
-@ObjectType()
+@Resolver()
 class userResolver {
   @Query(() => UserResponse)
   @UseMiddleware(isAuthenticated)
