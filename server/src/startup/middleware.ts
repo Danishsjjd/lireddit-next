@@ -12,12 +12,23 @@ import PostResolver from "../resolver/post"
 import userResolver from "../resolver/user"
 import { MyContext } from "../type"
 import { prod } from "../utils/utils"
+import cors from "cors"
 
 export default async function middleware(app: Express, prisma: PrismaClient) {
-  const redis = createClient({ legacyMode: true })
+  const redis = createClient({
+    legacyMode: true,
+    password: "eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81",
+  })
   redis.connect().catch(console.error)
 
   const RedisStore = RedisStoreFunc(session)
+
+  app.use(
+    cors({
+      origin: process.env.CORS_ORIGIN,
+      credentials: true,
+    })
+  )
 
   let request: null | Request = null
   let response: null | Response = null
@@ -27,7 +38,10 @@ export default async function middleware(app: Express, prisma: PrismaClient) {
       resave: false,
       saveUninitialized: false,
       name: COOKIE_NAME,
-      store: new RedisStore({ client: redis, disableTouch: true }),
+      store: new RedisStore({
+        client: redis,
+        disableTouch: true,
+      }),
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
         httpOnly: true,
