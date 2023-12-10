@@ -13,20 +13,12 @@ type IconProps = {
 }
 
 export const IconBtn: React.FC<
-  IconProps &
-    React.DetailedHTMLProps<
-      React.ButtonHTMLAttributes<HTMLButtonElement>,
-      HTMLButtonElement
-    >
+  IconProps & React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>
 > = ({ Icon, children, color, isActive, ...otherProps }) => {
   return (
     <button
       className={` relative flex items-center p-1 ${
-        color
-          ? colors[color]
-          : isActive
-          ? "btn-before-style text-red-500"
-          : "text-indigo-500"
+        color ? colors[color] : isActive ? "btn-before-style text-red-500" : "text-indigo-500"
       } flex cursor-pointer rounded`}
       {...otherProps}
     >

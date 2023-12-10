@@ -6,7 +6,7 @@ import prisma from "./startup/db"
 
 async function main() {
   const app = express()
-  const port = process.env.PORT || 4000
+  const port = process.env.PORT
 
   middleware(app, prisma)
 

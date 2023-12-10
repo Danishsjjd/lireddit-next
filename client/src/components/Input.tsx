@@ -1,11 +1,5 @@
 import { ErrorMessage } from "@hookform/error-message"
-import {
-  DeepMap,
-  FieldError,
-  Path,
-  UseFormRegister,
-  RegisterOptions,
-} from "react-hook-form"
+import { DeepMap, FieldError, Path, UseFormRegister, RegisterOptions } from "react-hook-form"
 
 type InputProps<T extends {}> = {
   title: string
@@ -32,9 +26,7 @@ const Input = <T extends {}>({
       <h3 className="pb-1 text-lg font-medium text-white">{title}</h3>
       <input
         type={type}
-        className={`${
-          className ? className : ""
-        } input-bordered input w-full min-w-[18rem] sm:min-w-[23rem]`}
+        className={`${className ? className : ""} input-bordered input w-full min-w-[18rem] sm:min-w-[23rem]`}
         {...register(name, validations)}
         {...props}
       />

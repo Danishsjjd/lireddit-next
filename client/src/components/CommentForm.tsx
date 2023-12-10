@@ -4,19 +4,10 @@ type Props = {
   loading: boolean
   error?: string
   autoFocus?: boolean
-  onSubmit: (
-    message: string,
-    setMessage: Dispatch<SetStateAction<string>>
-  ) => void
+  onSubmit: (message: string, setMessage: Dispatch<SetStateAction<string>>) => void
   initialValue?: string
 }
-const CommentForm = ({
-  error,
-  loading,
-  autoFocus = false,
-  onSubmit,
-  initialValue = "",
-}: Props) => {
+const CommentForm = ({ error, loading, autoFocus = false, onSubmit, initialValue = "" }: Props) => {
   const [message, setMessage] = useState(initialValue)
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault()
@@ -31,11 +22,7 @@ const CommentForm = ({
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         ></textarea>
-        <button
-          className="btn-primary btn !h-[unset]"
-          disabled={loading}
-          type="submit"
-        >
+        <button className="btn-primary btn !h-[unset]" disabled={loading} type="submit">
           {loading ? "loading" : "Post"}
         </button>
       </div>

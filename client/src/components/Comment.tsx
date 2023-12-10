@@ -6,10 +6,8 @@ import {
   useUpdateCommentMutation,
 } from "@/generated/graphql"
 import graphqlRequest from "@/libs/graphqlRequest"
-import dateFormatter from "@/utils/dateFormatter"
 import showError from "@/utils/showError"
-import { ClientError } from "graphql-request"
-import { Dispatch, SetStateAction, useEffect, useState } from "react"
+import { Dispatch, SetStateAction, useState } from "react"
 import { FaEdit, FaHeart, FaReply, FaTrash } from "react-icons/fa"
 import { FiHeart } from "react-icons/fi"
 import CommentForm from "./CommentForm"
@@ -38,33 +36,16 @@ const Comment = ({ comment }: Props) => {
   const [isReplying, setIsReplying] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [error, setError] = useState<string | false>(false)
-  const [clientCreatedAt, setClientCreatedAt] = useState(
-    dateFormatter.format(Date.parse(createdAt)).slice(0, -3)
-  )
 
-  const { mutate: CreateCommentFunc, isLoading } =
-    useCreateCommentMutation(graphqlRequest)
+  const { mutate: CreateCommentFunc, isLoading } = useCreateCommentMutation(graphqlRequest)
 
-  const { mutate: updateCommentFunc, isLoading: isUpdatingLoading } =
-    useUpdateCommentMutation(graphqlRequest)
+  const { mutate: updateCommentFunc, isLoading: isUpdatingLoading } = useUpdateCommentMutation(graphqlRequest)
 
-  const { mutate: deleteCurrentComment } =
-    useDeleteCommentMutation(graphqlRequest)
+  const { mutate: deleteCurrentComment } = useDeleteCommentMutation(graphqlRequest)
 
-  const { mutate: toggleLikeFunc } =
-    useToggleLikeOnCommentMutation(graphqlRequest)
+  const { mutate: toggleLikeFunc } = useToggleLikeOnCommentMutation(graphqlRequest)
 
-  // ? node.js provide different character in space while browser
-  // ? provide different so first browser paint not match that's
-  // ? why I'm removing space in server and adding back in client (browser)
-  useEffect(() => {
-    setClientCreatedAt(dateFormatter.format(Date.parse(createdAt)))
-  }, [])
-
-  function onNestedCommentCreation(
-    msg: string,
-    setMsg: Dispatch<SetStateAction<string>>
-  ) {
+  function onNestedCommentCreation(msg: string, setMsg: Dispatch<SetStateAction<string>>) {
     CreateCommentFunc(
       {
         options: {
@@ -88,8 +69,7 @@ const Comment = ({ comment }: Props) => {
       { commentId: id },
       {
         onSuccess(data) {
-          if (data.deleteComment.errors)
-            return showError(setError, data.deleteComment.errors)
+          if (data.deleteComment.errors) return showError(setError, data.deleteComment.errors)
           onPostCommentDelete?.(id)
         },
       }
@@ -101,8 +81,7 @@ const Comment = ({ comment }: Props) => {
       { options: { commentId: id, msg: msg } },
       {
         onSuccess: (data) => {
-          if (data.updateComment.errors)
-            return showError(setError, data.updateComment.errors)
+          if (data.updateComment.errors) return showError(setError, data.updateComment.errors)
 
           onPostCommentUpdate?.(id, msg)
           setIsUpdating(false)
@@ -116,11 +95,7 @@ const Comment = ({ comment }: Props) => {
       { commentId: id },
       {
         onSuccess({ changeLikeOnComment }) {
-          onToggleLike?.(
-            currentUser?.user?.id as string,
-            changeLikeOnComment.isHappen || false,
-            id
-          )
+          onToggleLike?.(currentUser?.user?.id as string, changeLikeOnComment.isHappen || false, id)
         },
       }
     )
@@ -128,9 +103,7 @@ const Comment = ({ comment }: Props) => {
 
   let isCurrentLikeIt = null
   if (comment.likes) {
-    isCurrentLikeIt = comment.likes.some(
-      ({ userId }) => userId == (currentUser?.user?.id as string)
-    )
+    isCurrentLikeIt = comment.likes.some(({ userId }) => userId == (currentUser?.user?.id as string))
   }
 
   return (
@@ -138,7 +111,7 @@ const Comment = ({ comment }: Props) => {
       <div className="rounded-lg border bg-zinc-900 p-2">
         <header className="mb-2 flex justify-between text-white">
           <span className=" font-bold">{user?.username}</span>
-          <span className="date">{clientCreatedAt}</span>
+          <span className="date">{new Date(createdAt).toString()}</span>
         </header>
         <div className="mx-2 whitespace-pre-wrap">
           {isUpdating ? (
@@ -153,46 +126,22 @@ const Comment = ({ comment }: Props) => {
           )}
         </div>
         <footer className="mt-2 flex gap-1">
-          <IconBtn
-            isActive={false}
-            Icon={isCurrentLikeIt ? FaHeart : FiHeart}
-            onClick={toggleLike}
-          >
+          <IconBtn isActive={false} Icon={isCurrentLikeIt ? FaHeart : FiHeart} onClick={toggleLike}>
             {comment.likes && comment.likes.length.toString()}
           </IconBtn>
-          <IconBtn
-            onClick={() => setIsReplying((pre) => !pre)}
-            isActive={isReplying}
-            Icon={FaReply}
-          />
+          <IconBtn onClick={() => setIsReplying((pre) => !pre)} isActive={isReplying} Icon={FaReply} />
           {user?.id === currentUser?.user?.id && (
             <>
-              <IconBtn
-                isActive={false}
-                Icon={FaEdit}
-                onClick={() => setIsUpdating((pre) => !pre)}
-              />
-              <IconBtn
-                isActive={false}
-                Icon={FaTrash}
-                color="danger"
-                onClick={deleteComment}
-              />
+              <IconBtn isActive={false} Icon={FaEdit} onClick={() => setIsUpdating((pre) => !pre)} />
+              <IconBtn isActive={false} Icon={FaTrash} color="danger" onClick={deleteComment} />
             </>
           )}
         </footer>
-        {error && (
-          <span className="text-lg font-medium text-red-600">{error}</span>
-        )}
+        {error && <span className="text-lg font-medium text-red-600">{error}</span>}
       </div>
       {isReplying && (
         <div className="mt-3">
-          <CommentForm
-            loading={isLoading}
-            onSubmit={onNestedCommentCreation}
-            autoFocus
-            initialValue=""
-          />
+          <CommentForm loading={isLoading} onSubmit={onNestedCommentCreation} autoFocus initialValue="" />
         </div>
       )}
       {childComments && childComments?.length > 0 && (
@@ -208,9 +157,7 @@ const Comment = ({ comment }: Props) => {
             </div>
           </div>
           <button
-            className={`${
-              !ariaHidden ? "hidden" : "block"
-            } btn-primary btn mt-1`}
+            className={`${!ariaHidden ? "hidden" : "block"} btn-primary btn mt-1`}
             onClick={() => setAriaHidden(false)}
           >
             Show Replies

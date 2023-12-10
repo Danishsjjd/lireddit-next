@@ -13,9 +13,7 @@ export default function Home() {
     <>
       <Header />
       <section className="mx-auto mt-5 flex max-w-4xl flex-col gap-3">
-        {data?.posts?.map((post) => (
-          <PostBox post={post} key={post.id} userId={user?.me.user?.id} />
-        ))}
+        {data?.posts?.map((post) => <PostBox post={post} key={post.id} userId={user?.me.user?.id} />)}
       </section>
     </>
   )

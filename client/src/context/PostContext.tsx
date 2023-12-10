@@ -1,10 +1,4 @@
-import {
-  CreateCommentMutation,
-  MeQuery,
-  PostQuery,
-  useMeQuery,
-  usePostQuery,
-} from "@/generated/graphql"
+import { CreateCommentMutation, MeQuery, PostQuery, useMeQuery, usePostQuery } from "@/generated/graphql"
 import graphqlRequest from "@/libs/graphqlRequest"
 import { useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/router"
@@ -20,17 +14,11 @@ type ContextType = {
   post?: PostQuery
   rootComments?: Comment
   commentsByParentId?: Record<any, Comment>
-  onPostCommentCreate?: (
-    comment: CreateCommentMutation["createComment"]
-  ) => void
+  onPostCommentCreate?: (comment: CreateCommentMutation["createComment"]) => void
   onPostCommentUpdate?: (id: string, msg: string) => void
   onPostCommentDelete?: (id: string) => void
   user?: MeQuery["me"] | undefined
-  onToggleLike?: (
-    userId: string,
-    likeOrDisLike: boolean,
-    commentId: string
-  ) => void
+  onToggleLike?: (userId: string, likeOrDisLike: boolean, commentId: string) => void
 }
 
 const Context = createContext<ContextType>({})
@@ -61,118 +49,98 @@ export function PostProvider({ children }: Props) {
 
   const rootComments = commentsByParentId["null"]
 
-  const onPostCommentCreate = ({
-    comments,
-  }: CreateCommentMutation["createComment"]) => {
-    queryClient.setQueryData<PostQuery>(
-      ["post", { id: post?.post.id }],
-      (data) => {
-        if (data?.post.comments) {
-          if (comments) {
-            const { createdAt, id, message, parentId } = comments
-            const newComments: PostQuery["post"]["comments"] = [
-              {
-                createdAt,
-                id,
-                message,
-                user: {
-                  id: user?.me.user?.id as string,
-                  username: user?.me.user?.username as string,
-                },
-                parentId: parentId || null,
-                likes: [],
+  const onPostCommentCreate = ({ comments }: CreateCommentMutation["createComment"]) => {
+    queryClient.setQueryData<PostQuery>(["post", { id: post?.post.id }], (data) => {
+      if (data?.post.comments) {
+        if (comments) {
+          const { createdAt, id, message, parentId } = comments
+          const newComments: PostQuery["post"]["comments"] = [
+            {
+              createdAt,
+              id,
+              message,
+              user: {
+                id: user?.me.user?.id as string,
+                username: user?.me.user?.username as string,
               },
-              ...data.post.comments,
-            ]
-            return {
-              post: {
-                ...data.post,
-                comments: newComments,
-              },
-            }
+              parentId: parentId || null,
+              likes: [],
+            },
+            ...data.post.comments,
+          ]
+          return {
+            post: {
+              ...data.post,
+              comments: newComments,
+            },
           }
         }
-        return data
       }
-    )
+      return data
+    })
   }
 
   const onPostCommentUpdate = (id: string, msg: string) => {
-    queryClient.setQueryData<PostQuery>(
-      ["post", { id: post?.post.id }],
-      (data) => {
-        if (data) {
-          if (data.post.comments) {
-            const updatedComments = data.post.comments.map((comment) => {
-              if (comment.id === id) return { ...comment, message: msg }
-              return comment
-            })
-            return {
-              ...data,
-              post: {
-                ...data.post,
-                comments: updatedComments,
-              },
-            }
-          } else return data
-        }
-        return data
+    queryClient.setQueryData<PostQuery>(["post", { id: post?.post.id }], (data) => {
+      if (data) {
+        if (data.post.comments) {
+          const updatedComments = data.post.comments.map((comment) => {
+            if (comment.id === id) return { ...comment, message: msg }
+            return comment
+          })
+          return {
+            ...data,
+            post: {
+              ...data.post,
+              comments: updatedComments,
+            },
+          }
+        } else return data
       }
-    )
+      return data
+    })
   }
 
   const onPostCommentDelete = (id: string) => {
-    queryClient.setQueryData<PostQuery>(
-      ["post", { id: post?.post.id as string }],
-      (data) => {
-        if (data) {
-          if (data.post.comments) {
-            const newData: PostQuery["post"]["comments"] =
-              data?.post.comments.filter((comment) => comment.id !== id) || []
-            return {
-              ...data,
-              post: {
-                ...data.post,
-                comments: newData,
-              },
-            }
+    queryClient.setQueryData<PostQuery>(["post", { id: post?.post.id as string }], (data) => {
+      if (data) {
+        if (data.post.comments) {
+          const newData: PostQuery["post"]["comments"] =
+            data?.post.comments.filter((comment) => comment.id !== id) || []
+          return {
+            ...data,
+            post: {
+              ...data.post,
+              comments: newData,
+            },
           }
         }
-        return data
       }
-    )
+      return data
+    })
   }
 
-  const onToggleLike = (
-    userId: string,
-    likeOrDisLike: boolean,
-    commentId: string
-  ) => {
-    queryClient.setQueryData<PostQuery>(
-      ["post", { id: post?.post.id as string }],
-      (data) => {
-        if (data && data.post.comments) {
-          const updatedComments = data.post.comments.map((comment) => {
-            if (commentId === comment.id) {
-              if (likeOrDisLike)
-                return {
-                  ...comment,
-                  likes: [...(comment?.likes || []), { userId }],
-                }
-              else {
-                const newLike = (comment!.likes || []).filter(
-                  (user) => user.userId !== userId
-                )
-                return { ...comment, likes: newLike }
+  const onToggleLike = (userId: string, likeOrDisLike: boolean, commentId: string) => {
+    queryClient.setQueryData<PostQuery>(["post", { id: post?.post.id as string }], (data) => {
+      if (data && data.post.comments) {
+        const updatedComments = data.post.comments.map((comment) => {
+          if (commentId === comment.id) {
+            if (likeOrDisLike)
+              return {
+                ...comment,
+                likes: [...(comment?.likes || []), { userId }],
               }
+            else {
+              const newLike = (comment!.likes || []).filter((user) => user.userId !== userId)
+              return { ...comment, likes: newLike }
             }
-            return comment
-          })
-          return { ...data, post: { ...data.post, comments: updatedComments } }
-        }
-        return data
+          }
+          return comment
+        })
+        return { ...data, post: { ...data.post, comments: updatedComments } }
       }
-    )
+      return data
+    })
   }
 
   return (

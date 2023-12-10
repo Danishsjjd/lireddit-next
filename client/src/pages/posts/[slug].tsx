@@ -3,11 +3,7 @@ import CommentList from "@/components/CommentList"
 import Header from "@/components/Header"
 import PostBox from "@/components/PostBox"
 import { PostProvider, usePost } from "@/context/PostContext"
-import {
-  PostDocument,
-  PostQuery,
-  useCreateCommentMutation,
-} from "@/generated/graphql"
+import { PostDocument, PostQuery, useCreateCommentMutation } from "@/generated/graphql"
 import graphqlRequest from "@/libs/graphqlRequest"
 import { dehydrate, QueryClient } from "@tanstack/react-query"
 import { GetServerSideProps } from "next"
@@ -41,13 +37,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 const Post = () => {
   const { post, rootComments, onPostCommentCreate, user } = usePost()
-  const { mutate, error: createCommentError } =
-    useCreateCommentMutation(graphqlRequest)
+  const { mutate, error: createCommentError } = useCreateCommentMutation(graphqlRequest)
 
-  const onSubmit = (
-    message: string,
-    setMessage: Dispatch<SetStateAction<string>>
-  ) => {
+  const onSubmit = (message: string, setMessage: Dispatch<SetStateAction<string>>) => {
     mutate(
       {
         options: {
@@ -69,16 +61,9 @@ const Post = () => {
     <PostProvider>
       <Header />
       <div className="mx-auto max-w-7xl space-y-5 p-5">
-        <PostBox
-          post={post?.post as PostQuery["post"]}
-          userId={user?.user?.id}
-        />
+        <PostBox post={post?.post as PostQuery["post"]} userId={user?.user?.id} />
         <CommentForm loading={false} onSubmit={onSubmit} />
-        <section>
-          {rootComments != null && rootComments.length > 0 && (
-            <CommentList comments={rootComments} />
-          )}
-        </section>
+        <section>{rootComments != null && rootComments.length > 0 && <CommentList comments={rootComments} />}</section>
       </div>
     </PostProvider>
   )

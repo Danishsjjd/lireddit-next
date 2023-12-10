@@ -4,6 +4,7 @@ import usePublicRoute from "@/hooks/usePublicRoute"
 import graphqlRequest from "@/libs/graphqlRequest"
 import errorsKeys from "@/utils/showError"
 import { useQueryClient } from "@tanstack/react-query"
+import Image from "next/image"
 import { useRouter } from "next/router"
 import { useForm } from "react-hook-form"
 import { RotatingLines } from "react-loader-spinner"
@@ -34,13 +35,11 @@ const Signup = () => {
       { options: { password, email, username } },
       {
         onSuccess(data) {
-          if (data.signup.errors)
-            return errorsKeys(setError, data.signup.errors)
+          if (data.signup.errors) return errorsKeys(setError, data.signup.errors)
 
           if (data.signup.user) {
             queryClient.setQueryData<MeQuery>(["me"], (queryData) => {
-              if (data.signup.user)
-                return { me: { user: { ...data.signup.user } } }
+              if (data.signup.user) return { me: { user: { ...data.signup.user } } }
 
               return queryData
             })
@@ -54,17 +53,11 @@ const Signup = () => {
   return (
     <section className="grid min-h-screen min-w-full place-items-center bg-slate-900">
       {isLoading ? (
-        <RotatingLines
-          strokeColor="grey"
-          strokeWidth="5"
-          animationDuration="0.75"
-          width="96"
-          visible={true}
-        />
+        <RotatingLines strokeColor="grey" strokeWidth="5" animationDuration="0.75" width="96" visible={true} />
       ) : (
         <main className="mx-auto max-w-xl ">
           <div className="mb-4 flex flex-col items-center justify-center gap-3">
-            <img src="/logo.svg" alt="logo" className="w-20" />
+            <Image width={80} height={80} src="/logo.svg" alt="logo" className="w-20" />
             <h3 className="text-4xl">Login</h3>
           </div>
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
@@ -111,10 +104,7 @@ const Signup = () => {
                 },
               }}
             />
-            <button
-              type="submit"
-              className={`btn-primary btn w-full ${isSubmitting && "loading"}`}
-            >
+            <button type="submit" className={`btn-primary btn w-full ${isSubmitting && "loading"}`}>
               Login
             </button>
           </form>
